@@ -24,7 +24,7 @@ def find_diff(image, background, rangex=50, rangey=50 , range_deg = 7 ):
         background = cv2.cvtColor(background , cv2.COLOR_BGR2GRAY)
     
     #mask to not loose black pixels of background while applying mask after shifting background
-    _,mask_orig = cv2.threshold(background , 1, 255 ,cv2.THRESH_BINARY_INV)
+    _,mask_orig = cv2.threshold(image , 1, 255 ,cv2.THRESH_BINARY_INV)
     
     minimum = 255
     best_match = None
@@ -33,114 +33,116 @@ def find_diff(image, background, rangex=50, rangey=50 , range_deg = 7 ):
         for y in range(-rangey , rangey+1,3):
             for theta in range(-range_deg , range_deg+1, 2):
                 #shift
-                background_temp = ndimage.shift(background , shift = [x , y] )
+                image_temp = ndimage.shift(image , shift = [x , y] )
                 mask_orig_temp = ndimage.shift(mask_orig , shift = [x,y])
                 
                 #rotate
-                background_temp = ndimage.rotate(background_temp, angle = theta , reshape = False)
+                image_temp = ndimage.rotate(image_temp, angle = theta , reshape = False)
                 mask_orig_temp = ndimage.rotate(mask_orig_temp , angle = theta, reshape = False)
                 
-                _,mask_background = cv2.threshold(background_temp , 1 , 255 , cv2.THRESH_BINARY)
+                _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
                 
                 #final mask for calculating difference
-                mask = mask_background + mask_orig_temp
+                mask = mask_image + mask_orig_temp
                 
                 #size of the significant area
                 size = np.sum(mask)/255
                 
-                image_temp = cv2.bitwise_and(image , mask)
+                background_temp = cv2.bitwise_and(background , mask)
                 diff = cv2.absdiff(background_temp , image_temp )
             
                 res = np.sum(diff)/size
                 if minimum  > res:
                     minimum = res
                     best_match = diff
-                    print(x ,y ,theta)
-    return best_match
+                    # print(x ,y ,theta)
+                    shift_rotate = (x,y,theta)
+    return best_match, shift_rotate
 
 def Left_index(points): 
-	
-	''' 
-	Finding the left most point 
-	'''
-	minn = 0
-	for i in range(1,len(points)): 
-		if points[i][0] < points[minn][0]: 
-			minn = i 
-		elif points[i][0] == points[minn][0]: 
-			if points[i][1] > points[minn][1]: 
-				minn = i 
-	return minn 
+
+    ''' 
+    Finding the left most point 
+    '''
+    minn = 0
+    for i in range(1,len(points)): 
+        if points[i][0] < points[minn][0]: 
+            minn = i 
+        elif points[i][0] == points[minn][0]: 
+            if points[i][1] > points[minn][1]: 
+                minn = i 
+    return minn 
 
 def orientation(p, q, r): 
-	''' 
-	To find orientation of ordered triplet (p, q, r). 
-	The function returns following values 
-	0 --> p, q and r are colinear 
-	1 --> Clockwise 
-	2 --> Counterclockwise 
-	'''
-	val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]) 
+    ''' 
+    To find orientation of ordered triplet (p, q, r). 
+    The function returns following values 
+    0 --> p, q and r are colinear 
+    1 --> Clockwise 
+    2 --> Counterclockwise 
+    '''
+    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]) 
 
-	if val == 0: 
-		return 0
-	elif val > 0: 
-		return 1
-	else: 
-		return 2
+    if val == 0: 
+        return 0
+    elif val > 0: 
+        return 1
+    else: 
+        return 2
 
 def convexHull(points, n): 
     pts = []
-	# There must be at least 3 points 
+    # There must be at least 3 points 
     if n < 3:
         return
 
-	# Find the leftmost point 
+    # Find the leftmost point 
     l = Left_index(points) 
 
     hull = [] 
-	
+
     ''' Start from leftmost point, keep moving counterclockwise 
     until reach the start point again. This loop runs O(h) 
-	times where h is number of points in result or output. '''
+    times where h is number of points in result or output. '''
     p = l 
     q = 0
     while(True): 
-		
-		# Add current point to result 
+
+        # Add current point to result 
         hull.append(p) 
 
         ''' 
-		Search for a point 'q' such that orientation(p, [1], 
-		q) is counterclockwise for all points 'x'. The idea 
-		is to keep track of last visited most counterclock- 
-		wise point in q. If any point 'i' is more counterclock- 
-		wise than q, then update q. 
+        Search for a point 'q' such that orientation(p, [1], 
+        q) is counterclockwise for all points 'x'. The idea 
+        is to keep track of last visited most counterclock- 
+        wise point in q. If any point 'i' is more counterclock- 
+        wise than q, then update q. 
         '''
         q = (p + 1) % n 
 
         for i in range(n): 
-            
-			
-			# If i is more counterclockwise 
-			# than current q, then update q 
+
+
+            # If i is more counterclockwise 
+            # than current q, then update q 
             if(orientation(points[p], points[i], points[q]) == 2): 
-            	q = i 
+                q = i 
 
         ''' 
-		Now q is the most counterclockwise with respect to p 
-		Set p as q for next iteration, so that q is added to 
-		result 'hull' 
+        Now q is the most counterclockwise with respect to p 
+        Set p as q for next iteration, so that q is added to 
+        result 'hull' 
         '''
         p = q 
 
-		# While we don't come to first point 
+        # While we don't come to first point 
         if(p == l): 
-        	break
-	# Print Result 
+            break
+    # Print Result 
     for each in hull: 
-    	pts.append([points[each][0] , points[each][1]])
+        pts.append([points[each][0] , points[each][1]])
     return pts 
+
 
 roi = 50
 def boundFill(img, contours):
@@ -222,26 +224,45 @@ def boundFill(img, contours):
     return res
 
 bg = cv2.imread("images/bg.jpg")
-bg = cv2.resize(bg,(bg.shape[1]//4,bg.shape[0]//4))
-cv2.imshow("bg",bg)
+bg = cv2.resize(bg,(bg.shape[1]//5,bg.shape[0]//5))
 img1 = cv2.imread("images/img1.jpg")
-img2 = cv2.imread("images/img2.jpg")
 img1 = cv2.resize(img1,(bg.shape[1],bg.shape[0]))
-img2 = cv2.resize(img2,(bg.shape[1],bg.shape[0]))
-cv2.imshow("img1", img1)
-cv2.imshow("img2", img2)
+diff,shift_rotate = find_diff(img1 , bg)
 
-diff = find_diff(img1 , bg)
-_ , diff = cv2.threshold(diff, 30 , 255 , cv2.THRESH_BINARY)
-cv2.imshow("thresholded" , diff)
-diff = cv2.erode(diff , np.ones((3,3), np.uint8)  , iterations = 3)
 
+_ , diff = cv2.threshold(diff, 15 , 255 , cv2.THRESH_BINARY)
+cv2.imwrite("thresholded.jpg" , diff)
+
+#white portions with small area turned to black
+diff = cv2.erode(diff , np.full((5,5),255, np.uint8)  , iterations = 3)
+cv2.imwrite("eroded.jpg" , diff)
+
+#collect white areas together
+diff = cv2.dilate(diff , np.full((5,5),255, np.uint8)  , iterations = 9)
+cv2.imwrite("dilated.jpg" , diff)
+
+#edge detection
 canny = cv2.Canny(diff , 90 ,100)
+cv2.imwrite("canny.jpg" , canny)
+
+#find contours
 contours , hierarchy = cv2.findContours(canny , cv2.RETR_EXTERNAL , cv2.CHAIN_APPROX_NONE)
 
+#Make mask for chnged area
 finalmask = boundFill(diff , contours)
-detected = cv2.bitwise_and(finalmask , img1 )
-cv2.imshow("detected" , detected)
+
+#Making shape of final mask == shape of img1
+finalmask = np.stack((finalmask,finalmask,finalmask),axis=2)
+
+#shift
+image_temp = ndimage.shift(img1 , shift = [shift_rotate[0] , shift_rotate[1],0] )
+
+#rotate
+image_temp = ndimage.rotate(image_temp, angle = shift_rotate[2] , reshape = False)
+
+#final image
+detected = cv2.bitwise_and(finalmask , image_temp)
+cv2.imwrite("detected.jpg" , detected)
 
 
 cv2.waitKey(0)
