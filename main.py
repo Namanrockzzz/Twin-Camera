@@ -15,50 +15,95 @@ def shadow_remove(img):
     return shadowremov
 
 def find_diff(image, background, rangex=50, rangey=50 , range_deg = 7 ):
-    #image = shadow_remove(image)
-    #background = shadow_remove(background)
-    
     if len(image.shape)==3 :
         image = cv2.cvtColor(image , cv2.COLOR_BGR2GRAY)
     if len(background.shape)==3 :
         background = cv2.cvtColor(background , cv2.COLOR_BGR2GRAY)
-    
-    #mask to not loose black pixels of background while applying mask after shifting background
+        
     _,mask_orig = cv2.threshold(image , 1, 255 ,cv2.THRESH_BINARY_INV)
-    
     minimum = 255
     best_match = None
+    final_x = 0
     for x in range(-rangex , rangex+1,3):
-        print(x)
-        for y in range(-rangey , rangey+1,3):
-            for theta in range(-range_deg , range_deg+1, 2):
-                #shift
-                image_temp = ndimage.shift(image , shift = [x , y] )
-                mask_orig_temp = ndimage.shift(mask_orig , shift = [x,y])
-                
-                #rotate
-                image_temp = ndimage.rotate(image_temp, angle = theta , reshape = False)
-                mask_orig_temp = ndimage.rotate(mask_orig_temp , angle = theta, reshape = False)
-                
-                _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
-                
-                #final mask for calculating difference
-                mask = mask_image + mask_orig_temp
-                
-                #size of the significant area
-                size = np.sum(mask)/255
-                
-                background_temp = cv2.bitwise_and(background , mask)
-                diff = cv2.absdiff(background_temp , image_temp )
-            
-                res = np.sum(diff)/size
-                if minimum  > res:
-                    minimum = res
-                    best_match = diff
-                    # print(x ,y ,theta)
-                    shift_rotate = (x,y,theta)
-    return best_match, shift_rotate
+        print("x",x)
+         #shift
+        image_temp = ndimage.shift(image , shift = [x , 0] )
+        mask_orig_temp = ndimage.shift(mask_orig , shift = [x,0])
+        
+        _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
+        #final mask for calculating difference
+        mask = mask_image + mask_orig_temp
+        size = np.sum(mask)/255
+        background_temp = cv2.bitwise_and(background , mask)
+        diff = cv2.absdiff(background_temp , image_temp )
 
+        res = np.sum(diff)/size
+        if minimum  > res:
+            minimum = res
+            final_x = x
+    
+    image1 = ndimage.shift(image , shift = [final_x , 0] )
+    mask_orig1 = ndimage.shift(mask_orig , shift = [final_x,0])
+    
+    final_y = 0
+    for y in range(-rangey , rangey+1,3):
+        print("y",y)
+         #shift
+        image_temp = ndimage.shift(image1 , shift = [0, y])
+        mask_orig_temp = ndimage.shift(mask_orig1 , shift = [0,y])
+        
+        _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
+        #final mask for calculating difference
+        mask = mask_image + mask_orig_temp
+        size = np.sum(mask)/255
+        background_temp = cv2.bitwise_and(background , mask)
+        diff = cv2.absdiff(background_temp , image_temp )
+        res = np.sum(diff)/size
+        if minimum  > res:
+            minimum = res
+            final_y = y
+            
+    image1 = ndimage.shift(image , shift = [0 , final_y] )
+    mask_orig1 = ndimage.shift(mask_orig , shift = [0,final_y])
+    
+    final_theta = 0
+    for theta in range(-range_deg , range_deg+1, 2):
+        print("theta",theta)
+        #rotate
+        image_temp = ndimage.rotate(image1, angle = theta , reshape = False)
+        mask_orig_temp = ndimage.rotate(mask_orig1, angle = theta, reshape = False) 
+        
+        _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
+        mask = mask_image + mask_orig_temp
+        size = np.sum(mask)/255
+        background_temp = cv2.bitwise_and(background , mask)
+        diff = cv2.absdiff(background_temp , image_temp )
+        res = np.sum(diff)/size
+        if minimum  > res:
+            minimum = res
+            final_theta = theta
+    
+    #shift
+    image_temp = ndimage.shift(image , shift = [final_x , final_y] )
+    mask_orig_temp = ndimage.shift(mask_orig , shift = [final_x,final_y])
+                
+    #rotate
+    image_temp = ndimage.rotate(image_temp, angle = final_theta , reshape = False)
+    mask_orig_temp = ndimage.rotate(mask_orig_temp , angle = final_theta, reshape = False)
+    
+    _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
+                
+    #final mask for calculating difference
+    mask = mask_image + mask_orig_temp
+                
+    #size of the significant area
+    size = np.sum(mask)/255      
+    background_temp = cv2.bitwise_and(background , mask)
+    diff = cv2.absdiff(background_temp , image_temp)
+    best_match = diff
+    shift_rotate = (final_x,final_y,theta)
+    return best_match, shift_rotate
+    
 def Left_index(points): 
 
     ''' 
