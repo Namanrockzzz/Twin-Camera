@@ -1,269 +1,270 @@
 import cv2
 import numpy as np
 from scipy import ndimage
+import datetime
 
-def shadow_remove(img):
-    rgb_planes = cv2.split(img)
-    result_norm_planes = []
-    for plane in rgb_planes:
-        dilated_img = cv2.dilate(plane, np.ones((7,7), np.uint8))
-        bg_img = cv2.medianBlur(dilated_img, 21)
-        diff_img = 255 - cv2.absdiff(plane, bg_img)
-        norm_img = cv2.normalize(diff_img,None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-        result_norm_planes.append(norm_img)
-    shadowremov = cv2.merge(result_norm_planes)
-    return shadowremov
+def x_shift(image, background, mask_orig, minimum=255, rangex=50):
+    final_x = 0
+    images = []
+    masks = [] 
+    
+    for x in range(-rangex, rangex+1,1):
+        #print("x",x)
+         #shift
+        image_temp = ndimage.shift(image , shift = [x , 0] )
+        mask_temp = ndimage.shift(mask_orig , shift = [x,0])
+        
+        images.append(image_temp)
+        masks.append(mask_temp)
+
+        #final mask for calculating difference
+    images = np.array(images , np.uint8)
+    masks = np.array(masks , np.uint8)
+    
+    backgrounds = np.bitwise_and(background ,masks)
+    
+    diffs = cv2.absdiff(backgrounds , images)
+    
+    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    masks1 = np.reshape(masks , (masks.shape[0], -1))
+
+    sizes = np.sum(masks1, axis=1)/255
+    res = np.sum(diffs1 , axis =1)/sizes
+
+    index = np.argmin(res)
+    
+    if res[index] < minimum : 
+        minimum = res[index]
+        final_x = -rangex+index
+        
+    print("X done")
+    return minimum, images[index] , masks[index], final_x
+
+def y_shift(image, background, mask_orig, minimum=255, rangey=50):
+
+    final_y = 0
+    images = []
+    masks = []
+    
+    for y in range(-rangey, rangey+1,1):
+        #print("y",y)
+         #shift
+        image_temp = ndimage.shift(image , shift = [0 , y] )
+        mask_temp = ndimage.shift(mask_orig , shift = [0,y])
+        
+        images.append(image_temp)
+        masks.append(mask_temp)
+    
+    images = np.array(images , np.uint8)
+    masks = np.array(masks , np.uint8)
+    
+    backgrounds = np.bitwise_and(background ,masks)
+    
+    diffs = cv2.absdiff(backgrounds ,images)
+    
+    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    
+    sizes = np.sum(masks1, axis=1)/255
+    res = np.sum(diffs1 , axis =1)/sizes
+
+    index = np.argmin(res)
+    
+    if res[index] < minimum : 
+        minimum = res[index]
+        final_y = -rangey+index
+        
+    print("Y done")
+    return minimum, images[index] , masks[index], final_y
+        
+def theta_rotate(image, background, mask_orig, minimum=255, range_deg = 7):
+    final_theta = 0
+    images = []
+    masks = []
+    for theta in range(-range_deg, range_deg+1,1):
+        #print("theta",theta)
+         #shift
+        image_temp = ndimage.rotate(image, angle = theta , reshape = False)
+        mask_temp = ndimage.rotate(mask_orig, angle = theta, reshape = False) 
+        
+        
+        images.append(image_temp)
+        masks.append(mask_temp)
+    
+    images = np.array(images , np.uint8)
+    masks = np.array(masks , np.uint8)
+    
+    backgrounds = np.bitwise_and(background ,masks)
+    diffs = cv2.absdiff(backgrounds , images)
+    
+    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    
+    sizes = np.sum(masks1, axis=1)/255
+    
+    res = np.sum(diffs1 , axis =1)/sizes
+    
+    index = np.argmin(res)
+    
+    if res[index] < minimum : 
+        minimum = res[index]
+        final_theta = -range_deg+index
+        
+    print("theta done")
+    return minimum, images[index] , masks[index], final_theta
 
 def find_diff(image, background, rangex=50, rangey=50 , range_deg = 7 ):
-    #image = shadow_remove(image)
-    #background = shadow_remove(background)
-    
     if len(image.shape)==3 :
         image = cv2.cvtColor(image , cv2.COLOR_BGR2GRAY)
     if len(background.shape)==3 :
         background = cv2.cvtColor(background , cv2.COLOR_BGR2GRAY)
+        
+    mask_orig = np.full(image.shape , 255 , np.uint8)
     
-    #mask to not loose black pixels of background while applying mask after shifting background
-    _,mask_orig = cv2.threshold(image , 1, 255 ,cv2.THRESH_BINARY_INV)
+    MIN = 255
+    IMAGE = None
+    MASK = None
+    shift_rotate = []
     
+    
+    ################################# case1  #######################################
+    #x,y,theta
+    print("CASE 1")
     minimum = 255
-    best_match = None
-    for x in range(-rangex , rangex+1,3):
-        print(x)
-        for y in range(-rangey , rangey+1,3):
-            for theta in range(-range_deg , range_deg+1, 2):
-                #shift
-                image_temp = ndimage.shift(image , shift = [x , y] )
-                mask_orig_temp = ndimage.shift(mask_orig , shift = [x,y])
+    
+    temp, image1 , mask_orig1 , x = x_shift(image, background, mask_orig, minimum, rangex)
+    
+    temp, image1 , mask_orig1 , y= y_shift(image1, background, mask_orig1, temp, rangey) 
+    
+    temp, image1  ,mask_orig1 , theta= theta_rotate(image1, background, mask_orig1, temp, range_deg)
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [('x',x) ,('y' ,y) ,('r', theta)]
+        
+    ################################# case2 #######################################
+    #y,x,theta
+    print("CASE 2")
+    minimum = 255
+    
+    temp, image1  ,mask_orig1 , y = y_shift(image, background, mask_orig, minimum, rangey)
+    
+    temp, image1 , mask_orig1 , x = x_shift(image1, background, mask_orig1, temp, rangex) 
+    
+    temp, image1 , mask_orig1 ,theta= theta_rotate(image1, background, mask_orig1, temp, range_deg)
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [('y',y) ,('x' ,x) ,('r', theta)]
+    ################################# case3 #######################################
+    #theta,y,x
+    print("CASE 3")
+    minimum = 255
+    
+    temp, image1 , mask_orig1 , theta= theta_rotate(image, background, mask_orig, minimum, range_deg)
+    
+    temp, image1 , mask_orig1 , y= y_shift(image1, background, mask_orig1, temp, rangey) 
+    
+    temp, image1 , mask_orig1 , x= x_shift(image1, background, mask_orig1, temp, rangex) 
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [('r', theta) ,('y',y) ,('x' ,x) ]
+    
+    ################################# case4 #######################################
+    #x,theta,y
+    print("CASE 4")
+    minimum = 255
+    temp, image1 , mask_orig1 , x = x_shift(image, background, mask_orig, minimum, rangex)
+
+    temp, image1 , mask_orig1 , theta= theta_rotate(image1, background, mask_orig1, temp, range_deg)
+    
+    temp, image1 , mask_orig1, y = y_shift(image1, background, mask_orig1, temp, rangey)
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [('x' ,x) , ('r', theta) ,('y',y)]
+    
+    ################################# case5 #######################################
+    #theta, x, y
+    print("CASE 5")
+    minimum = 255
+    temp, image1 , mask_orig1 ,theta = theta_rotate(image, background, mask_orig, minimum, range_deg)
+    
+    temp, image1 , mask_orig1 ,x= x_shift(image1, background, mask_orig1, temp, rangex)
+    
+    temp, image1 , mask_orig1 ,y= y_shift(image1, background, mask_orig1, temp, rangey)
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [ ('r', theta) ,('x' ,x) ,('y',y)]
+    
+    ################################# case6 #######################################
+    # y,theta,x
+    print("CASE 6")
+    minimum = 255
+    temp, image1 , mask_orig1 ,y = y_shift(image, background, mask_orig, minimum, rangey)
+    
+    temp, image1 , mask_orig1 ,theta= theta_rotate(image1, background, mask_orig1, temp, range_deg)
+    
+    temp, image1 , mask_orig1 ,x= x_shift(image1, background, mask_orig1, temp, rangex) 
+    
+    if temp<MIN:
+        MIN = temp
+        MASK = mask_orig1
+        IMAGE = image1
+        shift_rotate = [('y',y), ('r', theta) ,('x' ,x) ]
+
+    ####################################################################################
                 
-                #rotate
-                image_temp = ndimage.rotate(image_temp, angle = theta , reshape = False)
-                mask_orig_temp = ndimage.rotate(mask_orig_temp , angle = theta, reshape = False)
-                
-                _,mask_image = cv2.threshold(image_temp , 1 , 255 , cv2.THRESH_BINARY)
-                
-                #final mask for calculating difference
-                mask = mask_image + mask_orig_temp
-                
-                #size of the significant area
-                size = np.sum(mask)/255
-                
-                background_temp = cv2.bitwise_and(background , mask)
-                diff = cv2.absdiff(background_temp , image_temp )
-            
-                res = np.sum(diff)/size
-                if minimum  > res:
-                    minimum = res
-                    best_match = diff
-                    # print(x ,y ,theta)
-                    shift_rotate = (x,y,theta)
+    background_temp = cv2.bitwise_and(background , MASK)
+    best_match = cv2.absdiff(background_temp , IMAGE)
     return best_match, shift_rotate
 
-def Left_index(points): 
-
-    ''' 
-    Finding the left most point 
-    '''
-    minn = 0
-    for i in range(1,len(points)): 
-        if points[i][0] < points[minn][0]: 
-            minn = i 
-        elif points[i][0] == points[minn][0]: 
-            if points[i][1] > points[minn][1]: 
-                minn = i 
-    return minn 
-
-def orientation(p, q, r): 
-    ''' 
-    To find orientation of ordered triplet (p, q, r). 
-    The function returns following values 
-    0 --> p, q and r are colinear 
-    1 --> Clockwise 
-    2 --> Counterclockwise 
-    '''
-    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]) 
-
-    if val == 0: 
-        return 0
-    elif val > 0: 
-        return 1
-    else: 
-        return 2
-
-def convexHull(points, n): 
-    pts = []
-    # There must be at least 3 points 
-    if n < 3:
-        return
-
-    # Find the leftmost point 
-    l = Left_index(points) 
-
-    hull = [] 
-
-    ''' Start from leftmost point, keep moving counterclockwise 
-    until reach the start point again. This loop runs O(h) 
-    times where h is number of points in result or output. '''
-    p = l 
-    q = 0
-    while(True): 
-
-        # Add current point to result 
-        hull.append(p) 
-
-        ''' 
-        Search for a point 'q' such that orientation(p, [1], 
-        q) is counterclockwise for all points 'x'. The idea 
-        is to keep track of last visited most counterclock- 
-        wise point in q. If any point 'i' is more counterclock- 
-        wise than q, then update q. 
-        '''
-        q = (p + 1) % n 
-
-        for i in range(n): 
-
-
-            # If i is more counterclockwise 
-            # than current q, then update q 
-            if(orientation(points[p], points[i], points[q]) == 2): 
-                q = i 
-
-        ''' 
-        Now q is the most counterclockwise with respect to p 
-        Set p as q for next iteration, so that q is added to 
-        result 'hull' 
-        '''
-        p = q 
-
-        # While we don't come to first point 
-        if(p == l): 
-            break
-    # Print Result 
-    for each in hull: 
-        pts.append([points[each][0] , points[each][1]])
-    return pts 
-
-
-roi = 50
-def boundFill(img, contours):
-    
-    #replqce points of every contour by their bounding rectangle
-    for i in range(len(contours)):
-        x ,y ,w,h= cv2.boundingRect(contours[i])
-        contours[i] = [[x,y] ,[x+w,y+h]]
-        
-    pts = []
-    max_area = 0
-    
-    j= 0
-    while j < len(contours):
-        (min_x , min_y) = img.shape
-        max_x = max_y = 0
-        cnt_included = []
-        pts_tmp = []
-        cnt = contours[j]
-        
-        for i,cnt2 in enumerate(contours):
-            # if cnt2 lies in roi around cnt
-            if cnt[1][0]+roi>=cnt2[0][0] and cnt[0][0]-roi<=cnt2[1][0] and cnt[1][1]+roi>=cnt2[0][1] and cnt[0][1]-roi<=cnt2[1][1]:
-                max_x = max([max_x ,cnt[1][0] , cnt2[1][0]])
-                min_x = min([min_x ,cnt[0][0] , cnt2[0][0]])
-                max_y = max([max_y ,cnt[1][1] , cnt2[1][1]])
-                min_y = min([min_y ,cnt[0][1] , cnt2[0][1]])
-                cnt_included.append(i)
-                pts_tmp = pts_tmp + [contours[i]]
-        i=0 
-        N =n= len(pts_tmp)
-        while i < n :
-            pt = pts_tmp[i]
-            
-            #remove the contours included in roi of cnt
-            contours.remove(pt)
-            
-            #pt includes more than one contours
-            if len(pt) > 2 :
-                
-                #add all contours included in pt
-                pts_tmp = pts_tmp + pts_tmp[i][2:]
-                pts_tmp.pop(i)
-                
-                i = i-1 
-                n =  n-1
-            
-            if cnt_included[i]<=j:
-                j = j-1
-            
-            i=i+1
-        
-        area = (max_x-min_x)*(max_y-min_y)
-        if area > max_area:
-            max_area = area
-            pts = pts_tmp
-        
-        if N>1:
-            #add the contours and bounding rectangle of the roi around cnt
-            contours.append([[min_x , min_y] , [max_x ,max_y]]+pts_tmp)
-            
-        j = j+1
-        
-    #add other two points of bounding rectangle of all the other contours    
-    for i in range(len(pts)):
-        x1 = pts[i][0][0]
-        x2 = pts[i][1][0]
-        y1 = pts[i][0][1]
-        y2 = pts[i][1][1]
-        pts[i] = pts[i]+[[x1,y2],[x2,y1]]
-    
-    pts = np.array(pts , np.int32).reshape((-1,2))
-    pts = convexHull(pts, len(pts))
-    pts =  np.array([pts] , np.int32)
-    pts = pts.reshape((-1,1, 2)) 
-    
-    res = cv2.fillPoly(np.zeros(img.shape , np.uint8), [pts], (255,255,255))
-    
-    return res
-
-bg = cv2.imread("images/bg.jpg")
-bg = cv2.resize(bg,(bg.shape[1]//5,bg.shape[0]//5))
-img1 = cv2.imread("images/img1.jpg")
+time_temp = datetime.datetime.now()
+bg = cv2.imread("background5.jpg")
+bg = cv2.resize(bg,(bg.shape[1]//3,bg.shape[0]//3))
+img1 = cv2.imread("image5.jpg")
 img1 = cv2.resize(img1,(bg.shape[1],bg.shape[0]))
 diff,shift_rotate = find_diff(img1 , bg)
+print(datetime.datetime.now() - time_temp)
 
+print(shift_rotate)
+
+#cv2.imwrite("diff.jpg" , diff)
 
 _ , diff = cv2.threshold(diff, 15 , 255 , cv2.THRESH_BINARY)
-cv2.imwrite("thresholded.jpg" , diff)
+#cv2.imwrite("thresholded.jpg" , diff)
 
-#white portions with small area turned to black
-diff = cv2.erode(diff , np.full((5,5),255, np.uint8)  , iterations = 3)
-cv2.imwrite("eroded.jpg" , diff)
+diff = cv2.erode(diff , np.full((3,3),255, np.uint8)  , iterations = 4)
+#cv2.imwrite("eroded.jpg" , diff)
 
-#collect white areas together
-diff = cv2.dilate(diff , np.full((5,5),255, np.uint8)  , iterations = 9)
-cv2.imwrite("dilated.jpg" , diff)
+diff = cv2.dilate(diff , np.full((7,7),255, np.uint8)  , iterations = 10)
+#cv2.imwrite("dilated.jpg" , diff)
+dilated = diff.copy()
 
-#edge detection
-canny = cv2.Canny(diff , 90 ,100)
-cv2.imwrite("canny.jpg" , canny)
+image_temp = img1.copy()
+for i in shift_rotate:
+    if i[0]=='x':
+        image_temp = ndimage.shift(image_temp , shift = [i[1] , 0,0] )
+    elif i[0]=='y':
+        image_temp = ndimage.shift(image_temp , shift = [0,i[1],0] )
+    else:
+        ndimage.rotate(image_temp, angle = i[1] , reshape = False)
 
-#find contours
-contours , hierarchy = cv2.findContours(canny , cv2.RETR_EXTERNAL , cv2.CHAIN_APPROX_NONE)
+background_temp = bg.copy()
+background_temp[dilated==255] = image_temp[dilated==255]
+#cv2.imwrite("final.jpg",background_temp)
 
-#Make mask for chnged area
-finalmask = boundFill(diff , contours)
-
-#Making shape of final mask == shape of img1
-finalmask = np.stack((finalmask,finalmask,finalmask),axis=2)
-
-#shift
-image_temp = ndimage.shift(img1 , shift = [shift_rotate[0] , shift_rotate[1],0] )
-
-#rotate
-image_temp = ndimage.rotate(image_temp, angle = shift_rotate[2] , reshape = False)
-
-#final image
-detected = cv2.bitwise_and(finalmask , image_temp)
-cv2.imwrite("detected.jpg" , detected)
-
-
-cv2.waitKey(0)
-print(bg.shape)
+#np.save("new_code_test/diff.npy", diff)
+#open("new_code_test/shift_rotate.txt","w").write(str(shift_rotate))
