@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from PIL import Image, ImageChops, ImageOps
-import datetime
 
 def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     
@@ -139,6 +138,71 @@ def theta_rotate(image, background, mask_orig, minimum=255, deg_min = -7, deg_ma
     print("theta done")
     return minimum, images[index] , masks[index], final_theta
 
+def merge(bg_orig , imgs_orig):
+    width, height = bg_orig.size
+    scale = max(width, height)//1000
+    if scale==0:
+        scale=1
+    bg = bg_orig.copy()
+    bg = bg.resize((bg.size[0]//scale, bg.size[1]//scale))
+    imgs = []
+    for img in imgs_orig:
+        img1 = img.copy()
+        img1 = img1.resize((bg.size[0],bg.size[1]))
+        imgs.append(img1)
+    #print(len(imgs))
+    diffs = find_diff_helper(bg , imgs)
+
+    zipped_diffs_imgs = zip(diffs,imgs_orig)
+    sorted_diffs_imgs = sorted(zipped_diffs_imgs, key = lambda x: np.count_nonzero(x[0][0]>=23))
+    tuples = zip(*sorted_diffs_imgs)
+    diffs, imgs_orig = [list(t) for t in tuples]
+    
+    background_temp = bg_orig.copy()
+    background_temp = np.array(background_temp)
+    for j,img in enumerate(imgs):
+        diff = diffs[j][0]
+        _ , diff = cv2.threshold(diff, 23, 255, cv2.THRESH_BINARY)
+        diff = cv2.erode(diff , np.full((3,3),255, np.uint8)  , iterations = 4)
+        diff = cv2.dilate(diff , np.full((5,5),255, np.uint8)  , iterations = 25)
+        diff = cv2.resize(diff, bg_orig.size)
+        cv2.imwrite("test/dilated"+str(j)+".jpg" , diff)
+        dilated = diff.copy()
+        image_temp = imgs_orig[j].copy()
+        width, height = img.size
+        mask = cv2.resize(diffs[j][2] , imgs_orig[j].size)
+        for i in diffs[j][1]:
+            if i[0]=='x':
+                x = i[1]*scale
+                if x>0:
+                    image_temp = ImageChops.offset(image_temp, x, 0)
+                    image_temp.paste((0,0,0), (0, 0, x, height))
+                elif x<0:
+                    image_temp = ImageChops.offset(image_temp, x, 0)
+                    image_temp.paste((0,0,0), (width+x, 0, width, height))
+
+            elif i[0]=='y':
+                y = i[1]*scale
+                if y>0:
+                    image_temp = ImageChops.offset(image_temp, 0, y)
+                    image_temp.paste((0,0,0), (0, 0, width, y))
+                elif y<0:
+                    image_temp = ImageChops.offset(image_temp, 0, y)
+                    image_temp.paste((0,0,0), ( 0, height+y, width, height))
+
+            else:
+                image_temp.rotate(i[1])
+        image_temp = np.array(image_temp)
+        dilated[mask==0] = 0    
+        background_temp[dilated>0] = image_temp[dilated>0]
+        Image.fromarray(background_temp).save("test/res"+str(j)+".jpg")
+    Image.fromarray(background_temp).save("test/final3.jpg")
+
+def find_diff_helper(background, image_list):
+    diff = []
+    for image in image_list:
+        diff.append(find_diff(image, background))
+    return diff
 
 def find_diff(image, background):
     if image.mode=="L":
@@ -162,7 +226,7 @@ def find_diff(image, background):
     minimum = 255
     
     temp, image1 , mask_orig1 , x = x_shift(image, background, mask_orig, minimum)
-    image_ = image1
+
     temp, image1 , mask_orig1 , y= y_shift(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp) 
     
     temp, image1  ,mask_orig1 , theta= theta_rotate(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
@@ -174,7 +238,7 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [('x',x) ,('y' ,y) ,('r', theta)]
         
     ################################# case2 #######################################
@@ -195,7 +259,7 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [('y',y) ,('x' ,x) ,('r', theta)]
     ################################# case3 #######################################
     #theta,y,x
@@ -215,7 +279,7 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [('r', theta) ,('y',y) ,('x' ,x) ]
     
     ################################# case4 #######################################
@@ -235,7 +299,7 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [('x' ,x) , ('r', theta) ,('y',y)]
     
     ################################# case5 #######################################
@@ -255,7 +319,7 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [ ('r', theta) ,('x' ,x) ,('y',y)]
     
     ################################# case6 #######################################
@@ -275,75 +339,17 @@ def find_diff(image, background):
         IMAGE = image1
         temp_x = x
         temp_y = y
-        temp_theta = theta
+        #temp_theta = theta
         shift_rotate = [('y',y), ('r', theta) ,('x' ,x) ]
 
     ####################################################################################
                 
     background_temp = np.bitwise_and(background , MASK)
     best_match = cv2.absdiff(background_temp , IMAGE)
-    return best_match, shift_rotate
+    return best_match, shift_rotate, MASK
 
-
-# import datetime
-bg_original = Image.open("images/bg2.jpg")
-img1_original = Image.open("images/img2.jpg")
-scale = 7
-# time_temp = datetime.datetime.now()
-bg = bg_original.copy()
-bg = bg.resize((bg.size[0]//scale, bg.size[1]//scale))
-img1 = img1_original.copy()
-img1 = img1.resize((bg.size[0],bg.size[1]))
-diff,shift_rotate = find_diff(img1 , bg)
-#diff , image_temp = find_diff(img1 , bg )
-# print(datetime.datetime.now() - time_temp)
-
-print(shift_rotate)
-
-#cv2.imwrite("diff.jpg" , diff)
-
-_ , diff = cv2.threshold(diff, 15 , 255 , cv2.THRESH_BINARY)
-#cv2.imwrite("thresholded.jpg" , diff)
-
-diff = cv2.erode(diff , np.full((3,3),255, np.uint8)  , iterations = 4)
-#cv2.imwrite("eroded.jpg" , diff)
-
-diff = cv2.dilate(diff , np.full((7,7),255, np.uint8)  , iterations = 10)
-#cv2.imwrite("dilated.jpg" , diff)
-dilated = diff.copy()
-
-image_temp = img1_original.copy()
-width, height = img1.size
-# time_temp = datetime.datetime.now()
-for i in shift_rotate:
-    if i[0]=='x':
-        x = i[1]*scale
-        if x>0:
-            image_temp = ImageChops.offset(image_temp, x, 0)
-            image_temp.paste((0,0,0), (0, 0, x, height))
-        elif x<0:
-            image_temp = ImageChops.offset(image_temp, x, 0)
-            image_temp.paste((0,0,0), (width+x, 0, width, height))
-            
-    elif i[0]=='y':
-        y = i[1]*scale
-        if y>0:
-            image_temp = ImageChops.offset(image_temp, 0, y)
-            image_temp.paste((0,0,0), (0, 0, width, y))
-        elif y<0:
-            image_temp = ImageChops.offset(image_temp, 0, y)
-            image_temp.paste((0,0,0), ( 0, height+y, width, height))
-            
-    else:
-        image_temp.rotate(i[1])
-# print(datetime.datetime.now() - time_temp)
-
-background_temp = bg_original.copy()
-image_temp = np.array(image_temp)
-background_temp = np.array(background_temp)
-background_temp[dilated==255] = image_temp[dilated==255]
-Image.fromarray(background_temp).save("final.jpg")
-
-
-# np.save("test/diff.npy", diff)
-# open("test/shift_rotate.txt","w").write(str(shift_rotate))
+bg_original = Image.open("images/bg.jpg")
+img1_original = Image.open("images/img1.jpg")
+img2_original = Image.open("images/img2.jpg")
+img3_original = Image.open("images/img3.jpg")
+merge(bg_original, [img1_original , img3_original])
