@@ -1,0 +1,35 @@
+/* *{
+    background-image: url("bg.gif");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+} */
+
+*{
+    background: url("giphy1.gif") no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    margin: 3px;
+    max-width: 100%;
+    max-height: auto;
+}
+
+body{
+    text-align: center;
+    color: white;
+}
+
+#heading_fp{
+    font-size: 4.8em;
+}
+
+#speciality_fp{
+    font-size: 2em;
+}
+
+body #button1{
+    height: 20%;
+    width: auto;
+}
