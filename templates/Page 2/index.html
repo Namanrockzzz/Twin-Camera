@@ -27,18 +27,22 @@
                   <img src="information.png" alt="" width="17" height="17" >
                 </a>
                 <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="navbarLightDropdownMenuLink">
-                  <li class="dropdown-item"> 1 .Upload all the images one by one.</li>
-                  <li class="dropdown-item"> 2 .Press submit.</li>
+                  <li class="dropdown-item"> 1. Choose the image file that contains only the background (used in all other images)</li>
+                  <li class="dropdown-item"> 2. Type the number of images you want to be merged</li>
+                  <li class="dropdown-item"> 3. Press submit</li>
                 </ul>
               </div>
             </ul>
           </div>
         </div>
       </nav>
-    <div class="container">
+      <div class="container">
         <div class="mb-3 box">
-            <label for="formFile" class="form-label">Images to merge  :</label>
+            <label for="formFile" class="form-label">Choose Background Image :</label>
             <input class="form-control" type="file" id="formFile">
+            <br>
+            <label for="NoOfImages" class="form-label">No.of Images to be Merged :</label>
+            <input type="number" class="form-control" id="NoOfImages">
             <br>
             <button type="button" class="btn btn-secondary">Submit</button> 
         </div>
