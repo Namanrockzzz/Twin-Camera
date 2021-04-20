@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block dropdown %}
+    <li class="dropdown-item"> 1. Choose the image file that contains only the background (used in all other images)</li>
+    <li class="dropdown-item"> 2. Type the number of images you want to be merged</li>
+    <li class="dropdown-item"> 3. Press submit</li>
+{% endblock dropdown %}
+
+{% block content %}
+    <div class="mb-3 box">
+        <form method="get" action="page3">
+            <label for="formFile" class="form-label">Choose Background Image :</label>
+            <input class="form-control" type="file" id="formFile">
+            <br>
+            <label for="NoOfImages" class="form-label">No.of Images to be Merged :</label>
+            <input type="number" class="form-control" id="NoOfImages" name="n">
+            <br>
+            <input type="submit" class="btn btn-secondary">
+        </form>
+        
+    </div>
+{% endblock content %}
+

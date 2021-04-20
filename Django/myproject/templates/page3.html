@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block dropdown %}
+    <li class="dropdown-item"> 1 .Upload all the images one by one.</li>
+    <li class="dropdown-item"> 2 .Press submit.</li>
+{% endblock dropdown %}
+
+{% block content %}
+    <div class="mb-3 box">
+        {% for i in n %}
+            <label for="formFile" class="form-label">Image{{i}}  :</label>
+            <input class="form-control" type="file" id="formFile">
+            <br>
+        {% endfor %}
+        
+        <br>
+        <button type="button" class="btn btn-secondary">Submit</button> 
+    </div>
+{% endblock content %}
