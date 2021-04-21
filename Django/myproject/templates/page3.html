@@ -6,14 +6,14 @@
 {% endblock dropdown %}
 
 {% block content %}
-    <div class="mb-3 box">
-        {% for i in n %}
-            <label for="formFile" class="form-label">Image{{i}}  :</label>
-            <input class="form-control" type="file" id="formFile">
+        <form method="get" action="{% url "processing" %}">
+            {% for i in n %}
+                <label for="formFile" class="form-label">Image{{i}}  :</label>
+                <input class="form-control" required=true type="file" id="formFile">
+                <br>
+            {% endfor %}
+            
             <br>
-        {% endfor %}
-        
-        <br>
-        <button type="button" class="btn btn-secondary">Submit</button> 
-    </div>
+            <input type="submit" class="btn btn-secondary">
+        </form>
 {% endblock content %}

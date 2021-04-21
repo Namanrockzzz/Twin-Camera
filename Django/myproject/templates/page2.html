@@ -7,17 +7,14 @@
 {% endblock dropdown %}
 
 {% block content %}
-    <div class="mb-3 box">
-        <form method="get" action="page3">
+        <form method="get" action="{% url "page3" %}">
             <label for="formFile" class="form-label">Choose Background Image :</label>
-            <input class="form-control" type="file" id="formFile">
+            <input class="form-control" required=true type="file" id="formFile">
             <br>
             <label for="NoOfImages" class="form-label">No.of Images to be Merged :</label>
-            <input type="number" class="form-control" id="NoOfImages" name="n">
+            <input type="number" required=true class="form-control" id="NoOfImages" name="n">
             <br>
             <input type="submit" class="btn btn-secondary">
-        </form>
-        
-    </div>
+        </form> 
 {% endblock content %}
 

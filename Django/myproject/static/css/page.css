@@ -32,4 +32,8 @@ body{
 .navbar-toggler-icon:focus {
     box-shadow: none;
 }
+.progress{
+    width : 70vh;
+    height: 5vh;
+}
 
