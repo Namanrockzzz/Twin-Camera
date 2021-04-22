@@ -31,6 +31,10 @@ def page3(request):
 
 def processing(request , n=0):
     print(request.FILES)
+    if request.method=='POST':
+        form = ImageForm(request.POST,request.FILES)
+        if form.is_valid():
+            form.save()
     t = Thread(target=update_progress)
     t.start()
     return redirect("track_progress")
