@@ -7,9 +7,11 @@
 {% endblock dropdown %}
 
 {% block content %}
-        <form method="get" action="{% url "page3" %}">
-            <label for="formFile" class="form-label">Choose Background Image :</label>
-            <input class="form-control" required=true type="file" id="formFile">
+        <form method="post" enctype="multipart/form-data" action="{% url "page3" %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <!-- <label for="formFile" class="form-label">Choose Background Image :</label>
+            <input class="form-control" required=true type="file" id="formFile"> -->
             <br>
             <label for="NoOfImages" class="form-label">No.of Images to be Merged :</label>
             <input type="number" required=true class="form-control" id="NoOfImages" name="n">

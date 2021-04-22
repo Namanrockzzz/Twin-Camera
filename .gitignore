@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
+*.ipynb
+.ipynb_checkpoints/
 
 # Postgres Sql Database
 db.sqlite3
