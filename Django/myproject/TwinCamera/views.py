@@ -23,12 +23,12 @@ def page3(request):
     print(request.FILES)
     n = int(n)
     if request.method=='POST':
-        form = ImgForm(request.POST,request.FILES)
+        form = BGForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
     else:
-        form = ImgForm()
-    return render(request, 'page3.html', {"n":[i for i in range(1,n+1)], 'form':form})
+        form = BGForm()
+    return render(request, 'page3.html', {"n":[i for i in range(1,n+1)], 'form':ImgForm(request.POST,request.FILES)})
 
 def processing(request , n=0):
     print(request.FILES)

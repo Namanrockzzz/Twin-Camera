@@ -8,12 +8,10 @@
 {% block content %}
         <form method="post" enctype="multipart/form-data" action="{% url "processing" %}">
             {% csrf_token %}
-            {% for i in n %}
                 {{ form.as_p }}
                 <!-- <label for="formFile" class="form-label">Image{{i}}  :</label>
                 <input class="form-control" required=true type="file" id="formFile"> -->
                 <br>
-            {% endfor %}
             
             <br>
             <input type="submit" class="btn btn-secondary">
