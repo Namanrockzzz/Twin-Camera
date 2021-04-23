@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from time import sleep
 from threading import Thread
-from .forms import ImageForm
-
+from .forms import BGForm, ImgForm
+n = 1
 progress = 0
 # Create your views here.
 def index(request):
@@ -10,29 +10,30 @@ def index(request):
 
 def page2(request):
     if request.method=='POST':
-        form = ImageForm(request.POST,request.FILES)
+        form = BGForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
     else:
-        form = ImageForm()
+        form = BGForm()
     return render(request, 'page2.html',{'form':form})
 
 def page3(request):
+    global n
     n = request.POST['n']
     print(request.FILES)
     n = int(n)
     if request.method=='POST':
-        form = ImageForm(request.POST,request.FILES)
+        form = ImgForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
     else:
-        form = ImageForm()
+        form = ImgForm()
     return render(request, 'page3.html', {"n":[i for i in range(1,n+1)], 'form':form})
 
 def processing(request , n=0):
     print(request.FILES)
     if request.method=='POST':
-        form = ImageForm(request.POST,request.FILES)
+        form = ImgForm(request.POST,request.FILES)
         if form.is_valid():
             form.save()
     t = Thread(target=update_progress)
