@@ -31,10 +31,10 @@ def path_and_rename(instance, filename):
 
 # Create your models here.
 class Image(models.Model):
-    bg = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img1 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img2 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img3 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img4 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img5 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img6 = models.ImageField(upload_to=path_and_rename, default="download.png")
+    bg = models.ImageField(upload_to=path_and_rename, default=None)
+    img1 = models.ImageField(upload_to=path_and_rename, default=None)
+    img2 = models.ImageField(upload_to=path_and_rename, default=None)
+    img3 = models.ImageField(upload_to=path_and_rename, default=None)
+    img4 = models.ImageField(upload_to=path_and_rename, default=None)
+    img5 = models.ImageField(upload_to=path_and_rename, default=None)
+    img6 = models.ImageField(upload_to=path_and_rename, default=None)

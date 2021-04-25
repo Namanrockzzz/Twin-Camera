@@ -2,7 +2,8 @@
 import cv2
 import numpy as np
 from PIL import Image, ImageChops, ImageOps
-from image_transformer import ImageTransformer
+from .image_transformer import ImageTransformer
+import myproject.config as config
 
 def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     
@@ -228,6 +229,8 @@ def merge(bg_orig , imgs_orig):
         img1 = img1.resize((bg.size[0],bg.size[1]))
         imgs.append(img1)
     # print(len(imgs))
+    global progress
+    progress = 2
     diffs = find_diff_helper(bg , imgs)
     
     zipped_diffs_imgs = zip(diffs,imgs_orig)
@@ -287,8 +290,11 @@ def merge(bg_orig , imgs_orig):
 
 def find_diff_helper(background, image_list):
     diff = []
-    for image in image_list:
+    for i,image in enumerate(image_list):
         diff.append(find_diff(image, background))
+        print("updated")
+        global progress
+        progress = i/image_list.length*100
     return diff
 
 def find_diff(image, background):
@@ -453,8 +459,11 @@ def find_diff(image, background):
     best_match = cv2.absdiff(background_temp , IMAGE)
     return best_match, shift_rotate, MASK
 
-bg_original = Image.open("images/bg.jpg")
-img1_original = Image.open("images/img1.jpg")
-img2_original = Image.open("images/img2.jpg")
-# img3_original = Image.open("images/img3.jpg")
-merge(bg_original, [img1_original, img2_original])
+def start():
+    bg_original = Image.open("images/bg.jpg")
+    img1_original = Image.open("images/img1.jpg")
+    img2_original = Image.open("images/img2.jpg")
+    # img3_original = Image.open("images/img3.jpg")
+    config.progress = 1
+    merge(bg_original, [img1_original, img2_original])
+
