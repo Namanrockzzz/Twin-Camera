@@ -3,7 +3,9 @@ import cv2
 import numpy as np
 from PIL import Image, ImageChops, ImageOps
 from .image_transformer import ImageTransformer
-import myproject.config as config
+from django.conf import settings
+from myproject import config
+import os
 
 def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     
@@ -460,9 +462,11 @@ def find_diff(image, background):
     return best_match, shift_rotate, MASK
 
 def start():
-    bg_original = Image.open("images/bg.jpg")
-    img1_original = Image.open("images/img1.jpg")
-    img2_original = Image.open("images/img2.jpg")
+    print("HI")
+    print(settings.MEDIA_ROOT)
+    bg_original = Image.open(str(settings.MEDIA_ROOT)+"/images/bg.jpg")
+    img1_original = Image.open(str(settings.MEDIA_ROOT)+"/images/img1.jpg")
+    img2_original = Image.open(str(settings.MEDIA_ROOT)+"/images/img2.jpg")
     # img3_original = Image.open("images/img3.jpg")
     config.progress = 1
     merge(bg_original, [img1_original, img2_original])
