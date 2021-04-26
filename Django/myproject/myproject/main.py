@@ -462,12 +462,47 @@ def find_diff(image, background):
     return best_match, shift_rotate, MASK
 
 def start():
-    print("HI")
-    print(settings.MEDIA_ROOT)
-    bg_original = Image.open(str(settings.MEDIA_ROOT)+"/images/bg.jpg")
-    img1_original = Image.open(str(settings.MEDIA_ROOT)+"/images/img1.jpg")
-    img2_original = Image.open(str(settings.MEDIA_ROOT)+"/images/img2.jpg")
+    path = str(settings.MEDIA_ROOT)+"/images/"
+    img1_original = None
+    img2_original = None
+    img3_original = None
+    img4_original = None
+    img5_original = None
+    img6_original = None
+    for i in os.listdir(path):
+        if path+i and 'bg.' in i:
+            bg_original = Image.open(path+i)
+        elif path+i and 'img1.' in i:
+            img1_original = Image.open(path+i)
+        elif path+i and 'img2.' in i:
+            img2_original = Image.open(path+i)
+        elif path+i and 'img3.' in i:
+            img3_original = Image.open(path+i)
+        elif path+i and 'img4.' in i:
+            img4_original = Image.open(path+i)
+        elif path+i and 'img5.' in i:
+            img5_original = Image.open(path+i)
+        elif path+i and 'img6.' in i:
+            img6_original = Image.open(path+i)
+        else:
+            pass
+    
+    l = []
+    if img1_original:
+        l.append(img1_original)
+    if img2_original:
+        l.append(img2_original)
+    if img3_original:
+        l.append(img3_original)
+    if img4_original:
+        l.append(img4_original)
+    if img5_original:
+        l.append(img5_original)
+    if img6_original:
+        l.append(img6_original)
     # img3_original = Image.open("images/img3.jpg")
     config.progress = 1
-    merge(bg_original, [img1_original, img2_original])
+    print("HI")
+    print(len(l))
+    merge(bg_original, l)
 

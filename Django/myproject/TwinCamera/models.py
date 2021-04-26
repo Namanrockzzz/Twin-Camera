@@ -1,5 +1,6 @@
 from django.db import models
 from django import forms
+from .storage import OverwriteStorage
 import os
 from uuid import uuid4
 
@@ -31,10 +32,10 @@ def path_and_rename(instance, filename):
 
 # Create your models here.
 class Image(models.Model):
-    bg = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img1 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img2 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img3 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img4 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img5 = models.ImageField(upload_to=path_and_rename, default="download.png")
-    img6 = models.ImageField(upload_to=path_and_rename, default="download.png")
+    bg = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img1 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img2 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img3 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img4 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img5 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    img6 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
