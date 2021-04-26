@@ -7,6 +7,8 @@ from django.conf import settings
 from myproject import config
 import os
 
+change = 0
+
 def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     
     final_x = 0
@@ -55,6 +57,7 @@ def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
         final_x = x_min+index
         
     print("X done")
+    config.progress += change
     return minimum, images[index] , masks[index], final_x
 
 def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
@@ -105,6 +108,7 @@ def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
         final_y = y_min+index
         
     print("Y done")
+    config.progress += change
     return minimum, images[index] , masks[index], final_y
 
 def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -143,6 +147,7 @@ def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
+    config.progress += change
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -181,6 +186,7 @@ def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
+    config.progress += change
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -216,6 +222,7 @@ def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
+    config.progress += change
     return minimum, images[index] , masks[index], final_theta
 
 def merge(bg_orig , imgs_orig):
@@ -231,8 +238,6 @@ def merge(bg_orig , imgs_orig):
         img1 = img1.resize((bg.size[0],bg.size[1]))
         imgs.append(img1)
     # print(len(imgs))
-    global progress
-    progress = 2
     diffs = find_diff_helper(bg , imgs)
     
     zipped_diffs_imgs = zip(diffs,imgs_orig)
@@ -248,7 +253,6 @@ def merge(bg_orig , imgs_orig):
         diff = cv2.erode(diff , np.full((3,3),255, np.uint8)  , iterations = 4)
         diff = cv2.dilate(diff , np.full((5,5),255, np.uint8)  , iterations = 23)
         diff = cv2.resize(diff, bg_orig.size)
-        cv2.imwrite("test/dilated"+str(j)+".jpg" , diff)
         dilated = diff.copy()
         image_temp = imgs_orig[j].copy()
         width, height = img.size
@@ -288,15 +292,12 @@ def merge(bg_orig , imgs_orig):
         image_temp = np.array(image_temp)
         dilated[mask==0] = 0
         background_temp[dilated>0] = image_temp[dilated>0]
-    Image.fromarray(background_temp).save("test/final.jpg")
+    Image.fromarray(background_temp).save(path + "final.jpg")
 
 def find_diff_helper(background, image_list):
     diff = []
     for i,image in enumerate(image_list):
         diff.append(find_diff(image, background))
-        print("updated")
-        global progress
-        progress = i/image_list.length*100
     return diff
 
 def find_diff(image, background):
@@ -461,8 +462,9 @@ def find_diff(image, background):
     best_match = cv2.absdiff(background_temp , IMAGE)
     return best_match, shift_rotate, MASK
 
+path = str(settings.MEDIA_ROOT)+"/images/"
+
 def start():
-    path = str(settings.MEDIA_ROOT)+"/images/"
     img1_original = None
     img2_original = None
     img3_original = None
@@ -501,8 +503,11 @@ def start():
     if img6_original:
         l.append(img6_original)
     # img3_original = Image.open("images/img3.jpg")
-    config.progress = 1
+    config.progress = 0
+    global change
+    change = 100/(31*len(l))
     print("HI")
     print(len(l))
     merge(bg_original, l)
+    config.progress = 100
 

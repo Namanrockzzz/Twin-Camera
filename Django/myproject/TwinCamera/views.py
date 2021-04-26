@@ -4,6 +4,7 @@ from threading import Thread
 from .forms import BGForm, ImgForm
 from myproject.main import start
 import myproject.config as config
+from django.conf import settings
 
 # Create your views here.
 def index(request):
@@ -42,4 +43,4 @@ def processing(request , n):
     return redirect("track_progress")
 
 def track_progress(request):
-    return render(request , 'processing.html', {'progress' :config.progress})
+    return render(request , 'processing.html', {'progress' :round(config.progress,2) , 'download':str(settings.MEDIA_ROOT)+"/images/final.jpg"})
