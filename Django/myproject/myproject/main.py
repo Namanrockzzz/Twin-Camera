@@ -226,6 +226,7 @@ def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7
     return minimum, images[index] , masks[index], final_theta
 
 def merge(bg_orig , imgs_orig):
+    config.progress+=change
     width, height = bg_orig.size
     scale = max(width, height)//1000
     if scale==0:
@@ -238,6 +239,7 @@ def merge(bg_orig , imgs_orig):
         img1 = img1.resize((bg.size[0],bg.size[1]))
         imgs.append(img1)
     # print(len(imgs))
+    config.progress += change
     diffs = find_diff_helper(bg , imgs)
     
     zipped_diffs_imgs = zip(diffs,imgs_orig)
@@ -247,6 +249,8 @@ def merge(bg_orig , imgs_orig):
     
     background_temp = bg_orig.copy()
     background_temp = np.array(background_temp)
+    change2 = (100-config.progress)/len(imgs)
+    print(change2)
     for j,img in enumerate(imgs):
         diff = diffs[j][0]
         _ , diff = cv2.threshold(diff, 27, 255, cv2.THRESH_BINARY)
@@ -292,6 +296,8 @@ def merge(bg_orig , imgs_orig):
         image_temp = np.array(image_temp)
         dilated[mask==0] = 0
         background_temp[dilated>0] = image_temp[dilated>0]
+        config.progress+=change2
+
     Image.fromarray(background_temp).save(path + "final.jpg")
 
 def find_diff_helper(background, image_list):
@@ -505,7 +511,7 @@ def start():
     # img3_original = Image.open("images/img3.jpg")
     config.progress = 0
     global change
-    change = 100/(31*len(l))
+    change = 100/(34*len(l))
     print("HI")
     print(len(l))
     merge(bg_original, l)

@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block dropdown %}
     <li class="dropdown-item"> Please wait while your images are being processed.</li>
@@ -7,6 +6,7 @@
 {% endblock dropdown %}
 
 {% block content %}
+    <p class="font-monospace">Processing your images ... </p>
     <div class="progress">
         <div class="progress-bar bg-info" role="progressbar" style= "width: {{progress}}%" aria-valuenow={{ progress }} aria-valuemin="0" aria-valuemax="100">{{progress}} %</div>
     </div>

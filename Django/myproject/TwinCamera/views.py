@@ -43,4 +43,7 @@ def processing(request , n):
     return redirect("track_progress")
 
 def track_progress(request):
-    return render(request , 'processing.html', {'progress' :round(config.progress,2) , 'download':str(settings.MEDIA_ROOT)+"/images/final.jpg"})
+    if config.progress==100 :
+        print(str(settings.MEDIA_ROOT)+"/images/final.jpg")
+        return render(request, 'download.html' , {'download':str(settings.MEDIA_ROOT)+"/images/final.jpg"})
+    return render(request , 'processing.html', {'progress' :round(config.progress,2)})

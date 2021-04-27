@@ -1,12 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    Hello 😎
-</body>
-</html>
+
+{% extends "base.html" %}
+
+{% block dropdown %}
+    <li class="dropdown-item"> Download the image.</li>
+{% endblock dropdown %}
+
+{% block content %}
+    <div>
+        <p class="font-monospace text-center">Your image is ready!</p>
+        <p class="text-center">
+            <a class="test-center" href="../media/images/final.jpg" download>Download image</a>
+        </p>
+    </div>
+    <img src="../media/images/final.jpg" alt="download" width="500" height= >
+{% endblock content %}
