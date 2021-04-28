@@ -2,7 +2,7 @@
 
 {% block dropdown %}
     <li class="dropdown-item"> Please wait while your images are being processed.</li>
-    <li class="dropdown-item"></li>Thank you for your patience</li>
+    <li class="dropdown-item"> Thank you for your patience</li>
 {% endblock dropdown %}
 
 {% block content %}
@@ -10,6 +10,8 @@
     <div class="progress">
         <div class="progress-bar bg-info" role="progressbar" style= "width: {{progress}}%" aria-valuenow={{ progress }} aria-valuemin="0" aria-valuemax="100">{{progress}} %</div>
     </div>
+    <br>
+    <p class="font-monospace" style="color:#FF0000";>Please don't press back or close the page</p>
 {% endblock content %}
 
 {% block scripts %}

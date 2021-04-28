@@ -5,9 +5,11 @@ from .forms import BGForm, ImgForm
 from myproject.main import start
 import myproject.config as config
 from django.conf import settings
+from .functions import empty_media_folder
 
 # Create your views here.
 def index(request):
+    empty_media_folder()
     return render(request, 'index.html')
 
 def page2(request):
@@ -23,6 +25,8 @@ def page3(request):
     n = request.POST['n']
     print(request.FILES)
     n = int(n)
+    if n>6 or n<1:
+        return redirect("page2")
     if request.method=='POST':
         form = BGForm(request.POST,request.FILES)
         if form.is_valid():

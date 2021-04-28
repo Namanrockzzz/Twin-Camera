@@ -33,3 +33,7 @@ body #button1{
     height: 20%;
     width: auto;
 }
+
+.errorlist{
+    display: none;
+}

@@ -6,6 +6,7 @@ from .image_transformer import ImageTransformer
 from django.conf import settings
 from myproject import config
 import os
+import time
 
 change = 0
 
@@ -299,6 +300,7 @@ def merge(bg_orig , imgs_orig):
         config.progress+=change2
 
     Image.fromarray(background_temp).save(path + "final.jpg")
+    config.progress = 0
 
 def find_diff_helper(background, image_list):
     diff = []
@@ -516,4 +518,6 @@ def start():
     print(len(l))
     merge(bg_original, l)
     config.progress = 100
+    time.sleep(3)
+    config.progress = 0
 

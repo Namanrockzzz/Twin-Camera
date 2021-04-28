@@ -32,10 +32,10 @@ def path_and_rename(instance, filename):
 
 # Create your models here.
 class Image(models.Model):
-    bg = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img1 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img2 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img3 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img4 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img5 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
-    img6 = models.ImageField(upload_to=path_and_rename, default="download.png", storage=OverwriteStorage())
+    bg = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img1 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img2 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img3 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img4 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img5 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    img6 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
