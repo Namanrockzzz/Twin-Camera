@@ -9,10 +9,7 @@
         <form method="post" enctype="multipart/form-data" action="{% url "processing" n %}">
             {% csrf_token %}
                 {{ form.as_p }}
-                <!-- <label for="formFile" class="form-label">Image{{i}}  :</label>
-                <input class="form-control" required=true type="file" id="formFile"> -->
                 <br>
-            
             <br>
             <input type="submit" class="btn btn-secondary">
         </form>

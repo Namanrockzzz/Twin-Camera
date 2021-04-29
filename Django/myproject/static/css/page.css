@@ -36,3 +36,7 @@ body{
     width : 70vh;
     height: 5vh;
 }
+.box > img{
+    max-width: 60vh;
+    max-height: 40vh;
+}
