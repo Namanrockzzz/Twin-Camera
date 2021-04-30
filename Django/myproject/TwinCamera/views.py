@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from time import sleep
 from threading import Thread
 from .forms import BGForm, ImgForm
@@ -6,12 +7,14 @@ from myproject.main import start
 import myproject.config as config
 from django.conf import settings
 from .functions import empty_media_folder
+from .models import Image
 
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
 
 def page2(request):
+    Image.objects.all().delete()
     empty_media_folder()
     form = BGForm()
     return render(request, 'page2.html',{'form':form})
@@ -28,9 +31,10 @@ def page3(request):
             return redirect("page2")
     else:
         form = BGForm()
+    print(Image.objects.count)
     return render(request, 'page3.html', {'n':n, 'form':ImgForm(request.POST,request.FILES)})
 
-def processing(request , n):
+def processing(request):
     print(request.FILES)
     if request.method=='POST':
         form = ImgForm(request.POST,request.FILES)
@@ -39,11 +43,13 @@ def processing(request , n):
             form.save()
         else:
             return redirect("page3")
+    config.process = 0
     t = Thread(target=start)
     t.start() 
-    return redirect("track_progress")
+    return render(request , 'processing.html')
 
 def track_progress(request):
-    if config.progress==100 :
-        return render(request, 'download.html')
-    return render(request , 'processing.html', {'progress' :round(config.progress,2)})
+    return JsonResponse({'progress' :round(config.progress,2)} , status= 200)
+
+def download(request):
+    return render(request , "download.html")

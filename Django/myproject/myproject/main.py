@@ -510,7 +510,6 @@ def start():
         l.append(img5_original)
     if img6_original:
         l.append(img6_original)
-    config.progress = 0
     global change
     change = 100/(34*len(l))
     merge(bg_original, l)

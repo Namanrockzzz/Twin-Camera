@@ -8,7 +8,7 @@
 {% block content %}
     <p class="font-monospace">Processing your images ... </p>
     <div class="progress">
-        <div class="progress-bar bg-info" role="progressbar" style= "width: {{progress}}%" aria-valuenow={{ progress }} aria-valuemin="0" aria-valuemax="100">{{progress}} %</div>
+        <div class="progress-bar bg-info" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <br>
     <p class="font-monospace" style="color:#FF0000";>Please don't press back or close the page</p>
@@ -16,8 +16,29 @@
 
 {% block scripts %}
     <script >
-        setTimeout(function(){
-        location.reload(true)
-    },3000)
+        setInterval(update, 3000);
+        function update(){
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'track_progress' %}",
+                success: function (response) {
+                    var progress = response['progress']
+                    console.log(progress)
+                    if(progress<100)
+                    {
+                        $('.progress-bar').attr("style" , `width:${progress}%`)
+                        $('.progress-bar').attr("aria-valuenow" , `${progress}`)
+                        $('.progress-bar').text(`${progress}%`)
+                    }
+                    else
+                    {
+                        window.location = "{% url 'download' %}";
+                    }
+                },
+                error: function (response) {
+                    console.log("Error")
+                }
+            })
+        }
     </script>
 {% endblock scripts %}}
