@@ -20,7 +20,7 @@
         function update(){
             $.ajax({
                 type: 'GET',
-                url: "{% url 'track_progress' %}",
+                url: "{% url 'track_progress' id=name%}",
                 success: function (response) {
                     var progress = response['progress']
                     console.log(progress)
@@ -32,7 +32,7 @@
                     }
                     else
                     {
-                        window.location = "{% url 'download' %}";
+                        window.location = "{% url 'download' id=name %}";
                     }
                 },
                 error: function (response) {

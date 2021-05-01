@@ -4,11 +4,22 @@ import numpy as np
 from PIL import Image, ImageChops, ImageOps
 from .image_transformer import ImageTransformer
 from django.conf import settings
-from myproject import config
+from TwinCamera.models import Image as instance
 import os
 import time
 
 change = 0
+
+def get_progress():
+    f = open(path+"/progress.txt","r")
+    temp = f.readline()
+    f.close()
+    return float(temp)
+
+def update_progress(value):
+    f = open(path+"/progress.txt","w")
+    f.write(str(value))
+    f.close()
 
 def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     
@@ -58,7 +69,7 @@ def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
         final_x = x_min+index
         
     print("X done")
-    config.progress += change
+    update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_x
 
 def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
@@ -109,7 +120,7 @@ def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
         final_y = y_min+index
         
     print("Y done")
-    config.progress += change
+    update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_y
 
 def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -148,7 +159,7 @@ def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
-    config.progress += change
+    update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -187,7 +198,7 @@ def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
-    config.progress += change
+    update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7, deg_max=7):
@@ -223,11 +234,11 @@ def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7
         final_theta = deg_min+index
         
     print("theta done")
-    config.progress += change
+    update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
 def merge(bg_orig , imgs_orig):
-    config.progress+=change
+    update_progress(int(get_progress())+change)
     width, height = bg_orig.size
     scale = max(width, height)//1000
     if scale==0:
@@ -240,7 +251,7 @@ def merge(bg_orig , imgs_orig):
         img1 = img1.resize((bg.size[0],bg.size[1]))
         imgs.append(img1)
     # print(len(imgs))
-    config.progress += change
+    update_progress(int(get_progress())+change)
     diffs = find_diff_helper(bg , imgs)
     
     zipped_diffs_imgs = zip(diffs,imgs_orig)
@@ -250,7 +261,7 @@ def merge(bg_orig , imgs_orig):
     
     background_temp = bg_orig.copy()
     background_temp = np.array(background_temp)
-    change2 = (100-config.progress)/len(imgs)
+    change2 = (100-get_progress())/len(imgs)
     print(change2)
     for j,img in enumerate(imgs):
         diff = diffs[j][0]
@@ -297,10 +308,10 @@ def merge(bg_orig , imgs_orig):
         image_temp = np.array(image_temp)
         dilated[mask==0] = 0
         background_temp[dilated>0] = image_temp[dilated>0]
-        config.progress+=change2
+        update_progress(int(get_progress())+change2)
 
     Image.fromarray(background_temp).save(path + "final.jpg")
-    config.progress = 0
+    update_progress(0)
 
 def find_diff_helper(background, image_list):
     diff = []
@@ -472,7 +483,10 @@ def find_diff(image, background):
 
 path = str(settings.MEDIA_ROOT)+"/images/"
 
-def start():
+def start(name):
+    global path
+    path = str(settings.MEDIA_ROOT)+"/images/"+str(name)+"/"
+    update_progress(0)
     img1_original = None
     img2_original = None
     img3_original = None
@@ -513,4 +527,4 @@ def start():
     global change
     change = 100/(34*len(l))
     merge(bg_original, l)
-    config.progress = 100
+    update_progress(100)

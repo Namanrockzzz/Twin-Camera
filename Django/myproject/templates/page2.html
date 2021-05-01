@@ -7,13 +7,10 @@
 {% endblock dropdown %}
 
 {% block content %}
-        <form method="post" enctype="multipart/form-data" action="{% url "page3" %}">
+        <form method="post" enctype="multipart/form-data" action="{% url 'processing'%}">
             {% csrf_token %}
             {{ form.as_p }}
             <br>
-            <label for="NoOfImages" class="form-label">No. of Images to be Merged :</label>
-            <input type="number" required=true class="form-control" id="NoOfImages" min=1 max=6 name="n">
-            <div class="form-text">More than 6 images are not supported</div>
             <br>
             <input type="submit" class="btn btn-secondary">
         </form> 

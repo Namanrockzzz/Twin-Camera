@@ -2,12 +2,14 @@ from django.db import models
 from django import forms
 from .storage import OverwriteStorage
 import os
-from uuid import uuid4
-from django.contrib.sessions.models import Session
-
+import uuid
 
 def path_and_rename(instance, filename):
-    upload_to = 'images'
+    try:
+        os.makedirs('images/'+str(instance.id))
+    except:
+        pass
+    upload_to = 'images/'+str(instance.id)
     ext = filename.split('.')[-1]
     # get filename
     s="unknown"
@@ -33,11 +35,11 @@ def path_and_rename(instance, filename):
 
 # Create your models here.
 class Image(models.Model):
-    sid = models.OneToOneField(Session ,on_delete=models.CASCADE)  
-    bg = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img1 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img2 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img3 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img4 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img5 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
-    img6 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    bg = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img1 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img2 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img3 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img4 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img5 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)
+    img6 = models.ImageField(upload_to=path_and_rename, null=True, blank=True)

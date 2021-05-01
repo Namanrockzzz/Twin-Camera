@@ -9,10 +9,10 @@
     <div>
         <p class="font-monospace text-center">Your image is ready!</p>
         <p class="text-center">
-            <a class="test-center" href="../media/images/final.jpg" download>Download image</a>
+            <a class="test-center" href="../media/images/{{ name }}/final.jpg" download>Download image</a>
         </p>
     </div>
-    <img src="../media/images/final.jpg" alt="download" >
+    <img src="../media/images/{{ name }}/final.jpg" alt="download" >
     <br><br>
     <center><a class="test-center" href="{% url "page2" %}">Try More Images</a></center>
 {% endblock content %}
