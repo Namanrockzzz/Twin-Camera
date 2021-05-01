@@ -11,6 +11,9 @@ from .models import Image
 
 # Create your views here.
 def index(request):
+    print(request.session.session_key)
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
     return render(request, 'index.html')
 
 def page2(request):
@@ -31,13 +34,13 @@ def page3(request):
             return redirect("page2")
     else:
         form = BGForm()
-    print(Image.objects.count)
     return render(request, 'page3.html', {'n':n, 'form':ImgForm(request.POST,request.FILES)})
 
 def processing(request):
     print(request.FILES)
     if request.method=='POST':
         form = ImgForm(request.POST,request.FILES)
+        form.instance.sid = request.session
         print(form.is_valid())
         if form.is_valid():
             form.save()

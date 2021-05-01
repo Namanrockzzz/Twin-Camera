@@ -3,6 +3,7 @@ from django import forms
 from .storage import OverwriteStorage
 import os
 from uuid import uuid4
+from django.contrib.sessions.models import Session
 
 
 def path_and_rename(instance, filename):
@@ -32,6 +33,7 @@ def path_and_rename(instance, filename):
 
 # Create your models here.
 class Image(models.Model):
+    sid = models.OneToOneField(Session ,on_delete=models.CASCADE)  
     bg = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
     img1 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
     img2 = models.ImageField(upload_to=path_and_rename, null=True, blank=True, storage=OverwriteStorage())
