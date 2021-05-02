@@ -9,6 +9,7 @@ import os
 import time
 
 change = 0
+Name = 0
 
 def get_progress():
     f = open(path+"/progress.txt","r")
@@ -29,7 +30,7 @@ def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
     width, height = image.size
     
     for x in range(x_min, x_max+1,1):
-        #print("x",x)
+        #print(Name,"x",x)
         #shift
         if x>0:
             image_temp = ImageChops.offset(image, x, 0)
@@ -68,7 +69,7 @@ def x_shift(image, background, mask_orig, minimum=255, x_min=-50, x_max=50):
         minimum = res[index]
         final_x = x_min+index
         
-    print("X done")
+    print(Name,"X done")
     update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_x
 
@@ -80,7 +81,7 @@ def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
     width, height = image.size
     
     for y in range(y_min, y_max+1,1):
-        #print("y",y)
+        #print(Name,"y",y)
         #shift
         if y>0:
             image_temp = ImageChops.offset(image, 0, y)
@@ -119,7 +120,7 @@ def y_shift(image, background, mask_orig, minimum=255, y_min=-50, y_max=50):
         minimum = res[index]
         final_y = y_min+index
         
-    print("Y done")
+    print(Name,"Y done")
     update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_y
 
@@ -130,7 +131,7 @@ def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7
     it1 = ImageTransformer(image)
     it2 = ImageTransformer(mask_orig)
     for theta in range(deg_min, deg_max+1,1):
-        #print("theta",theta)
+        #print(Name,"theta",theta)
          #shift
         image_temp = it1.rotate_along_axis(phi=theta)
         mask_temp = it2.rotate_along_axis(phi=theta) 
@@ -158,7 +159,7 @@ def theta_rotate_along_x(image, background, mask_orig, minimum=255, deg_min = -7
         minimum = res[index]
         final_theta = deg_min+index
         
-    print("theta done")
+    print(Name,"theta done")
     update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
@@ -169,7 +170,7 @@ def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7
     it1 = ImageTransformer(image)
     it2 = ImageTransformer(mask_orig)
     for theta in range(deg_min, deg_max+1,1):
-        #print("theta",theta)
+        #print(Name,"theta",theta)
          #shift
         image_temp = it1.rotate_along_axis(theta=theta)
         mask_temp = it2.rotate_along_axis(theta=theta) 
@@ -197,7 +198,7 @@ def theta_rotate_along_y(image, background, mask_orig, minimum=255, deg_min = -7
         minimum = res[index]
         final_theta = deg_min+index
         
-    print("theta done")
+    print(Name,"theta done")
     update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
@@ -206,7 +207,7 @@ def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7
     images = []
     masks = []
     for theta in range(deg_min, deg_max+1,1):
-        #print("theta",theta)
+        #print(Name,"theta",theta)
          #shift
         image_temp = image.rotate(angle = theta)
         mask_temp = mask_orig.rotate(angle = theta) 
@@ -233,7 +234,7 @@ def theta_rotate_along_z(image, background, mask_orig, minimum=255, deg_min = -7
         minimum = res[index]
         final_theta = deg_min+index
         
-    print("theta done")
+    print(Name,"theta done")
     update_progress(int(get_progress())+change)
     return minimum, images[index] , masks[index], final_theta
 
@@ -250,7 +251,7 @@ def merge(bg_orig , imgs_orig):
         img1 = img.copy()
         img1 = img1.resize((bg.size[0],bg.size[1]))
         imgs.append(img1)
-    # print(len(imgs))
+    # print(Name,len(imgs))
     update_progress(int(get_progress())+change)
     diffs = find_diff_helper(bg , imgs)
     
@@ -262,7 +263,7 @@ def merge(bg_orig , imgs_orig):
     background_temp = bg_orig.copy()
     background_temp = np.array(background_temp)
     change2 = (100-get_progress())/len(imgs)
-    print(change2)
+    print(Name,change2)
     for j,img in enumerate(imgs):
         diff = diffs[j][0]
         _ , diff = cv2.threshold(diff, 27, 255, cv2.THRESH_BINARY)
@@ -274,7 +275,7 @@ def merge(bg_orig , imgs_orig):
         width, height = img.size
         mask = cv2.resize(diffs[j][2] , imgs_orig[j].size)
         for i in diffs:
-            print(i[1])
+            print(Name,i[1])
 
         for i in diffs[j][1]:
             if i[0]=='x':
@@ -337,7 +338,7 @@ def find_diff(image, background):
     
     ################################# case1  #######################################
     #x,y,theta
-    print("CASE 1")
+    print(Name,"CASE 1")
     minimum = 255
     
     temp, image1 , mask_orig1 , x = x_shift(image, background, mask_orig, minimum)
@@ -349,8 +350,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case1: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case1: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -361,7 +362,7 @@ def find_diff(image, background):
         
     ################################# case2 #######################################
     #y,x,theta
-    print("CASE 2")
+    print(Name,"CASE 2")
     minimum = 255
     
     temp, image1  ,mask_orig1 , y = y_shift(image, background, mask_orig, minimum, temp_y-15, temp_y+15)
@@ -373,8 +374,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case2: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case2: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -384,7 +385,7 @@ def find_diff(image, background):
         shift_rotate = [('y',y) ,('x' ,x) ,('r', theta),('ax',theta_x),('ay',theta_y)]
     ################################# case3 #######################################
     #theta,y,x
-    print("CASE 3")
+    print(Name,"CASE 3")
     minimum = 255
     
     temp, image1 , mask_orig1 , theta= theta_rotate_along_z(image, background, mask_orig, minimum)
@@ -396,8 +397,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case3: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case3: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -408,7 +409,7 @@ def find_diff(image, background):
     
     ################################# case4 #######################################
     #x,theta,y
-    print("CASE 4")
+    print(Name,"CASE 4")
     minimum = 255
     temp, image1 , mask_orig1 , x = x_shift(image, background, mask_orig, minimum, temp_x-15, temp_x+15)
 
@@ -419,8 +420,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case4: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case4: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -431,7 +432,7 @@ def find_diff(image, background):
     
     ################################# case5 #######################################
     #theta, x, y
-    print("CASE 5")
+    print(Name,"CASE 5")
     minimum = 255
     temp, image1 , mask_orig1 ,theta = theta_rotate_along_z(image, background, mask_orig, minimum)
     
@@ -442,8 +443,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case5: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case5: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -454,7 +455,7 @@ def find_diff(image, background):
     
     ################################# case6 #######################################
     # y,theta,x
-    print("CASE 6")
+    print(Name,"CASE 6")
     minimum = 255
     temp, image1 , mask_orig1 ,y = y_shift(image, background, mask_orig, minimum, temp_y-15, temp_y+15)
     
@@ -465,8 +466,8 @@ def find_diff(image, background):
     temp, image1, mask_orig1, theta_x = theta_rotate_along_x(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
     
     temp, image1, mask_orig1, theta_y = theta_rotate_along_y(Image.fromarray(image1), background, Image.fromarray(mask_orig1), temp)
-    print("Case6: ",end=" ")
-    print(x,y,theta)
+    print(Name,"Case6: ",end=" ")
+    print(Name,x,y,theta)
     if temp<MIN:
         MIN = temp
         MASK = mask_orig1
@@ -484,6 +485,8 @@ def find_diff(image, background):
 path = str(settings.MEDIA_ROOT)+"/images/"
 
 def start(name):
+    global Name
+    Name = name
     global path
     path = str(settings.MEDIA_ROOT)+"/images/"+str(name)+"/"
     update_progress(0)
@@ -528,3 +531,4 @@ def start(name):
     change = 100/(34*len(l))
     merge(bg_original, l)
     update_progress(100)
+    return 

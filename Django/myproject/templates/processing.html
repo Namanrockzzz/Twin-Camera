@@ -20,7 +20,7 @@
         function update(){
             $.ajax({
                 type: 'GET',
-                url: "{% url 'track_progress' id=name%}",
+                url: "{% url 'track_progress' name %}",
                 success: function (response) {
                     var progress = response['progress']
                     console.log(progress)
