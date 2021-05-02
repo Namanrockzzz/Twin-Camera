@@ -51,6 +51,7 @@ def processing(request):
     return render(request , 'processing.html', {"name":str(name)})
 
 def track_progress(request, id):
+    print("Hi Rockzzz")
     print(threading.active_count(), id)
     f = open(settings.MEDIA_ROOT+"/images/"+str(id)+"/progress.txt","r")
     progress = float(f.readline())
