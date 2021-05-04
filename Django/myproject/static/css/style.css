@@ -35,6 +35,7 @@ body{
 #desc_fp > img{
     height : 10vh;
     width : 100vw;
+    max-width : 1000px;
 }
 
 .errorlist{

@@ -66,7 +66,7 @@ def x_shift(image, background, mask_orig, minimum, x_min, x_max,path, change):
         final_x = x_min+index
         
     print("X done")
-    update_progress(int(get_progress(path))+change, path)
+    update_progress(float(get_progress(path))+change, path)
     return minimum, images[index] , masks[index], final_x
 
 def y_shift(image, background, mask_orig, minimum, y_min, y_max,path, change):
@@ -116,7 +116,7 @@ def y_shift(image, background, mask_orig, minimum, y_min, y_max,path, change):
         final_y = y_min+index
         
     print("Y done")
-    update_progress(int(get_progress(path))+change, path)
+    update_progress(float(get_progress(path))+change, path)
     return minimum, images[index] , masks[index], final_y
 
 def theta_rotate_along_x(image, background, mask_orig, minimum, deg_min, deg_max,path, change):
@@ -154,7 +154,7 @@ def theta_rotate_along_x(image, background, mask_orig, minimum, deg_min, deg_max
         final_theta = deg_min+index
         
     print("theta done")
-    update_progress(int(get_progress(path))+change,path)
+    update_progress(float(get_progress(path))+change,path)
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_y(image, background, mask_orig, minimum, deg_min, deg_max,path, change):
@@ -192,7 +192,7 @@ def theta_rotate_along_y(image, background, mask_orig, minimum, deg_min, deg_max
         final_theta = deg_min+index
         
     print("theta done")
-    update_progress(int(get_progress(path))+change,path)
+    update_progress(float(get_progress(path))+change,path)
     return minimum, images[index] , masks[index], final_theta
 
 def theta_rotate_along_z(image, background, mask_orig, minimum, deg_min , deg_max ,path, change):
@@ -227,11 +227,11 @@ def theta_rotate_along_z(image, background, mask_orig, minimum, deg_min , deg_ma
         final_theta = deg_min+index
         
     print("theta done")
-    update_progress(int(get_progress(path))+change,path)
+    update_progress(float(get_progress(path))+change,path)
     return minimum, images[index] , masks[index], final_theta
 
 def merge(bg_orig , imgs_orig, path, change):
-    update_progress(int(get_progress(path))+change,path)
+    update_progress(float(get_progress(path))+change,path)
     width, height = bg_orig.size
     scale = max(width, height)//1000
     if scale==0:
@@ -239,11 +239,13 @@ def merge(bg_orig , imgs_orig, path, change):
     bg = bg_orig.copy()
     bg = bg.resize((bg.size[0]//scale, bg.size[1]//scale))
     imgs = []
-    for img in imgs_orig:
+    for i,img in enumerate(imgs_orig):
         img1 = img.copy()
         img1 = img1.resize((bg.size[0],bg.size[1]))
+        img = img.resize((bg_orig.size[0],bg_orig.size[1]))
         imgs.append(img1)
-    update_progress(int(get_progress(path))+change,path)
+        imgs_orig[i] = img
+    update_progress(float(get_progress(path))+change,path)
     diffs = find_diff_helper(bg , imgs, path, change)
     
     zipped_diffs_imgs = zip(diffs,imgs_orig)
@@ -300,7 +302,7 @@ def merge(bg_orig , imgs_orig, path, change):
         image_temp = np.array(image_temp)
         dilated[mask==0] = 0
         background_temp[dilated>0] = image_temp[dilated>0]
-        update_progress(int(get_progress(path))+change2,path)
+        update_progress(float(get_progress(path))+change2,path)
 
     Image.fromarray(background_temp).save(path + "final.jpg")
     update_progress(0,path)
@@ -515,6 +517,7 @@ def start(name):
     if img6_original:
         l.append(img6_original)
     change = 100/(34*len(l))
+    print(change)
     merge(bg_original, l, path, change)
     update_progress(100,path)
     return 
