@@ -2,17 +2,51 @@
 
 {% block dropdown %}
     <li class="dropdown-item"> 1. Choose the image file that contains only the background (used in all other images)</li>
-    <li class="dropdown-item"> 2. Type the number of images you want to be merged </li>
+    <li class="dropdown-item"> 2. Choose the images you want to merge in the background </li>
     <li class="dropdown-item"> 3. Press submit</li>
 {% endblock dropdown %}
 
 {% block content %}
         <form method="post" enctype="multipart/form-data" action="{% url 'processing'%}">
             {% csrf_token %}
-            {{ form.as_p }}
-            <br>
-            <br>
-            <input type="submit" class="btn btn-secondary">
+            <div class="row">
+                <div class="row justify-content-center">
+                    <div class="col-md-4 ">
+                        {{ form.bg.label }}:
+                        {{ form.bg }}
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <br>
+                        {{form.img1.label}}:
+                        {{form.img1}}
+                        <br>
+                        {{form.img2.label}}:
+                        {{form.img2}}
+                        <br>
+                        {{form.img3.label}}:
+                        {{form.img3}}
+                    </div>
+                    <div class="col-md-4">
+                        <br>
+                        {{form.img4.label}}:
+                        {{form.img4}}
+                        <br>
+                        {{form.img5.label}}:
+                        {{form.img5}}
+                        <br>
+                        {{form.img6.label}}:
+                        {{form.img6}}
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-3">     
+                        <br>       
+                        <input type="submit" class="btn btn-info">
+                    </div>
+                </div>
+            </div>
         </form> 
 {% endblock content %}
 

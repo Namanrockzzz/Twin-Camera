@@ -10,14 +10,9 @@ from .models import Image
 
 # Create your views here.
 def index(request):
-    # print(request.session.session_key)
-    # if not request.session.exists(request.session.session_key):
-    #     request.session.create()
     return render(request, 'index.html')
 
 def page2(request):
-    # Image.objects.all().delete()
-    # empty_media_folder()
     form = ImgForm()
     return render(request, 'page2.html',{'form':form})
 
