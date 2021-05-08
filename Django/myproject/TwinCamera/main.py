@@ -22,8 +22,8 @@ def update_progress(value,path):
 def x_shift(image, background, mask_orig, minimum, x_min, x_max,path, change):
     
     final_x = 0
-    images = []
-    masks = [] 
+    image_final = np.array(image)
+    mask_final = np.array(mask_orig)
     width, height = image.size
     
     for x in range(x_min, x_max+1,1):
@@ -42,38 +42,49 @@ def x_shift(image, background, mask_orig, minimum, x_min, x_max,path, change):
             image_temp = image.copy()
             mask_temp = mask_orig.copy()
         
-        images.append(np.array(image_temp))
-        masks.append(np.array(mask_temp))
+        # images.append(np.array(image_temp))
+        # masks.append(np.array(mask_temp))
+        image_temp = np.array(image_temp)
+        mask_temp = np.array(mask_temp)
+        background_temp = np.bitwise_and(background,mask_temp)
+        diff_temp = cv2.absdiff(background_temp, image_temp)
+        size = np.sum(mask_temp)/255
+        res_temp = np.sum(diff_temp)/size
+        if res_temp<minimum:
+            minimum = res_temp
+            final_x = x
+            image_final = image_temp
+            mask_final = mask_temp
 
         #final mask for calculating difference
-    images = np.array(images , np.uint8)
-    masks = np.array(masks , np.uint8)
+    # images = np.array(images , np.uint8)
+    # masks = np.array(masks , np.uint8)
     
-    backgrounds = np.bitwise_and(background ,masks)
+    # backgrounds = np.bitwise_and(background ,masks)
     
-    diffs = cv2.absdiff(backgrounds , images)
+    # diffs = cv2.absdiff(backgrounds , images)
     
-    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
-    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    # diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    # masks1 = np.reshape(masks , (masks.shape[0], -1))
 
-    sizes = np.sum(masks1, axis=1)/255
-    res = np.sum(diffs1 , axis =1)/sizes
+    # sizes = np.sum(masks1, axis=1)/255
+    # res = np.sum(diffs1 , axis =1)/sizes
 
-    index = np.argmin(res)
+    # index = np.argmin(res)
     
-    if res[index] < minimum : 
-        minimum = res[index]
-        final_x = x_min+index
+    # if res[index] < minimum : 
+    #     minimum = res[index]
+    #     final_x = x_min+index
         
     print("X done")
     update_progress(float(get_progress(path))+change, path)
-    return minimum, images[index] , masks[index], final_x
+    return minimum, image_final , mask_final, final_x
 
 def y_shift(image, background, mask_orig, minimum, y_min, y_max,path, change):
 
     final_y = 0
-    images = []
-    masks = []
+    image_final = np.array(image)
+    mask_final = np.array(mask_orig)
     width, height = image.size
     
     for y in range(y_min, y_max+1,1):
@@ -93,36 +104,47 @@ def y_shift(image, background, mask_orig, minimum, y_min, y_max,path, change):
             mask_temp = mask_orig.copy()
             
             
-        images.append(np.array(image_temp))
-        masks.append(np.array(mask_temp))
-    
-    images = np.array(images , np.uint8)
-    masks = np.array(masks , np.uint8)
-    
-    backgrounds = np.bitwise_and(background ,masks)
-    
-    diffs = cv2.absdiff(backgrounds , images)
-    
-    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
-    masks1 = np.reshape(masks , (masks.shape[0], -1))
-    
-    sizes = np.sum(masks1, axis=1)/255
-    res = np.sum(diffs1 , axis =1)/sizes
+        # images.append(np.array(image_temp))
+        # masks.append(np.array(mask_temp))
+        image_temp = np.array(image_temp)
+        mask_temp = np.array(mask_temp)
+        background_temp = np.bitwise_and(background,mask_temp)
+        diff_temp = cv2.absdiff(background_temp, image_temp)
+        size = np.sum(mask_temp)/255
+        res_temp = np.sum(diff_temp)/size
+        if res_temp<minimum:
+            minimum = res_temp
+            final_y = y
+            image_final = image_temp
+            mask_final = mask_temp
 
-    index = np.argmin(res)
+    # images = np.array(images , np.uint8)
+    # masks = np.array(masks , np.uint8)
     
-    if res[index] < minimum : 
-        minimum = res[index]
-        final_y = y_min+index
+    # backgrounds = np.bitwise_and(background ,masks)
+    
+    # diffs = cv2.absdiff(backgrounds , images)
+    
+    # diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    # masks1 = np.reshape(masks , (masks.shape[0], -1))
+    
+    # sizes = np.sum(masks1, axis=1)/255
+    # res = np.sum(diffs1 , axis =1)/sizes
+
+    # index = np.argmin(res)
+    
+    # if res[index] < minimum : 
+    #     minimum = res[index]
+    #     final_y = y_min+index
         
     print("Y done")
     update_progress(float(get_progress(path))+change, path)
-    return minimum, images[index] , masks[index], final_y
+    return minimum, image_final , mask_final, final_y
 
 def theta_rotate_along_x(image, background, mask_orig, minimum, deg_min, deg_max,path, change):
     final_theta = 0
-    images = []
-    masks = []
+    image_final = np.array(image)
+    mask_final = np.array(mask_orig)
     it1 = ImageTransformer(image)
     it2 = ImageTransformer(mask_orig)
     for theta in range(deg_min, deg_max+1,1):
@@ -131,36 +153,47 @@ def theta_rotate_along_x(image, background, mask_orig, minimum, deg_min, deg_max
         mask_temp = it2.rotate_along_axis(phi=theta) 
         
         
-        images.append(np.array(image_temp))
-        masks.append(np.array(mask_temp))
+        # images.append(np.array(image_temp))
+        # masks.append(np.array(mask_temp))
+        image_temp = np.array(image_temp)
+        mask_temp = np.array(mask_temp)
+        background_temp = np.bitwise_and(background,mask_temp)
+        diff_temp = cv2.absdiff(background_temp, image_temp)
+        size = np.sum(mask_temp)/255
+        res_temp = np.sum(diff_temp)/size
+        if res_temp<minimum:
+            minimum = res_temp
+            final_theta = theta
+            image_final = image_temp
+            mask_final = mask_temp
     
-    images = np.array(images , np.uint8)
-    masks = np.array(masks , np.uint8)
+    # images = np.array(images , np.uint8)
+    # masks = np.array(masks , np.uint8)
     
-    backgrounds = np.bitwise_and(background ,masks)
-    diffs = cv2.absdiff(backgrounds , images)
+    # backgrounds = np.bitwise_and(background ,masks)
+    # diffs = cv2.absdiff(backgrounds , images)
     
-    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
-    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    # diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    # masks1 = np.reshape(masks , (masks.shape[0], -1))
     
-    sizes = np.sum(masks1, axis=1)/255
+    # sizes = np.sum(masks1, axis=1)/255
     
-    res = np.sum(diffs1 , axis =1)/sizes
+    # res = np.sum(diffs1 , axis =1)/sizes
     
-    index = np.argmin(res)
+    # index = np.argmin(res)
     
-    if res[index] < minimum : 
-        minimum = res[index]
-        final_theta = deg_min+index
+    # if res[index] < minimum : 
+    #     minimum = res[index]
+    #     final_theta = deg_min+index
         
     print("theta done")
     update_progress(float(get_progress(path))+change,path)
-    return minimum, images[index] , masks[index], final_theta
+    return minimum, image_final , mask_final, final_theta
 
 def theta_rotate_along_y(image, background, mask_orig, minimum, deg_min, deg_max,path, change):
     final_theta = 0
-    images = []
-    masks = []
+    image_final = np.array(image)
+    mask_final = np.array(mask_orig)
     it1 = ImageTransformer(image)
     it2 = ImageTransformer(mask_orig)
     for theta in range(deg_min, deg_max+1,1):
@@ -169,66 +202,88 @@ def theta_rotate_along_y(image, background, mask_orig, minimum, deg_min, deg_max
         mask_temp = it2.rotate_along_axis(theta=theta) 
         
         
-        images.append(np.array(image_temp))
-        masks.append(np.array(mask_temp))
+        # images.append(np.array(image_temp))
+        # masks.append(np.array(mask_temp))
+        image_temp = np.array(image_temp)
+        mask_temp = np.array(mask_temp)
+        background_temp = np.bitwise_and(background,mask_temp)
+        diff_temp = cv2.absdiff(background_temp, image_temp)
+        size = np.sum(mask_temp)/255
+        res_temp = np.sum(diff_temp)/size
+        if res_temp<minimum:
+            minimum = res_temp
+            final_theta = theta
+            image_final = image_temp
+            mask_final = mask_temp
     
-    images = np.array(images , np.uint8)
-    masks = np.array(masks , np.uint8)
+    # images = np.array(images , np.uint8)
+    # masks = np.array(masks , np.uint8)
     
-    backgrounds = np.bitwise_and(background ,masks)
-    diffs = cv2.absdiff(backgrounds , images)
+    # backgrounds = np.bitwise_and(background ,masks)
+    # diffs = cv2.absdiff(backgrounds , images)
     
-    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
-    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    # diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    # masks1 = np.reshape(masks , (masks.shape[0], -1))
     
-    sizes = np.sum(masks1, axis=1)/255
+    # sizes = np.sum(masks1, axis=1)/255
     
-    res = np.sum(diffs1 , axis =1)/sizes
+    # res = np.sum(diffs1 , axis =1)/sizes
     
-    index = np.argmin(res)
+    # index = np.argmin(res)
     
-    if res[index] < minimum : 
-        minimum = res[index]
-        final_theta = deg_min+index
+    # if res[index] < minimum : 
+    #     minimum = res[index]
+    #     final_theta = deg_min+index
         
     print("theta done")
     update_progress(float(get_progress(path))+change,path)
-    return minimum, images[index] , masks[index], final_theta
+    return minimum, image_final , mask_final, final_theta
 
 def theta_rotate_along_z(image, background, mask_orig, minimum, deg_min , deg_max ,path, change):
     final_theta = 0
-    images = []
-    masks = []
+    image_final = np.array(image)
+    mask_final = np.array(mask_orig)
     for theta in range(deg_min, deg_max+1,1):
          #shift
         image_temp = image.rotate(angle = theta)
         mask_temp = mask_orig.rotate(angle = theta) 
         
-        images.append(np.array(image_temp))
-        masks.append(np.array(mask_temp))
+        # images.append(np.array(image_temp))
+        # masks.append(np.array(mask_temp))
+        image_temp = np.array(image_temp)
+        mask_temp = np.array(mask_temp)
+        background_temp = np.bitwise_and(background,mask_temp)
+        diff_temp = cv2.absdiff(background_temp, image_temp)
+        size = np.sum(mask_temp)/255
+        res_temp = np.sum(diff_temp)/size
+        if res_temp<minimum:
+            minimum = res_temp
+            final_theta = theta
+            image_final = image_temp
+            mask_final = mask_temp
     
-    images = np.array(images , np.uint8)
-    masks = np.array(masks , np.uint8)
+    # images = np.array(images , np.uint8)
+    # masks = np.array(masks , np.uint8)
     
-    backgrounds = np.bitwise_and(background ,masks)
-    diffs = cv2.absdiff(backgrounds , images)
+    # backgrounds = np.bitwise_and(background ,masks)
+    # diffs = cv2.absdiff(backgrounds , images)
     
-    diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
-    masks1 = np.reshape(masks , (masks.shape[0], -1))
+    # diffs1 = np.reshape(diffs , (diffs.shape[0], -1))
+    # masks1 = np.reshape(masks , (masks.shape[0], -1))
     
-    sizes = np.sum(masks1, axis=1)/255
+    # sizes = np.sum(masks1, axis=1)/255
     
-    res = np.sum(diffs1 , axis =1)/sizes
+    # res = np.sum(diffs1 , axis =1)/sizes
     
-    index = np.argmin(res)
+    # index = np.argmin(res)
     
-    if res[index] < minimum : 
-        minimum = res[index]
-        final_theta = deg_min+index
+    # if res[index] < minimum : 
+    #     minimum = res[index]
+    #     final_theta = deg_min+index
         
     print("theta done")
     update_progress(float(get_progress(path))+change,path)
-    return minimum, images[index] , masks[index], final_theta
+    return minimum, image_final , mask_final, final_theta
 
 def merge(bg_orig , imgs_orig, path, change):
     update_progress(float(get_progress(path))+change,path)

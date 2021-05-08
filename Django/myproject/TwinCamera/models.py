@@ -3,10 +3,11 @@ from django import forms
 from .storage import OverwriteStorage
 import os
 import uuid
+from django.conf import settings
 
 def path_and_rename(instance, filename):
     try:
-        os.makedirs('images/'+str(instance.id))
+        os.makedirs(settings.MEDIA_ROOT+'images/'+str(instance.id))
     except:
         pass
     upload_to = 'images/'+str(instance.id)

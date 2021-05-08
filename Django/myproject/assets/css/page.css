@@ -1,0 +1,47 @@
+
+html , body, .container{
+    height : 100vh;
+}
+body{
+    background: url('../images/giphy1.gif');
+}
+.container {
+    display: flex;
+    justify-content : center;
+    align-items: center;
+    flex-direction: column;
+    
+}
+.box{
+    border: 2px solid #4debff;
+    padding: 5%;
+    background-color: white;
+    max-width : 130vh;
+    max-height: fit-content;
+}
+.row{
+    padding :0;
+}
+
+.navbar,.btn-info{
+    background-color: #4debff;
+}
+.icon{
+    margin-right : 5%;
+}
+.navbar-nav{
+    margin-left: auto;
+}
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler-icon:focus {
+    box-shadow: none;
+}
+.progress{
+    width : 70vh;
+    height: 5vh;
+}
+.box > img{
+    max-width: 60vh;
+    max-height: 40vh;
+}

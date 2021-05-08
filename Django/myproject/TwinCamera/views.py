@@ -7,6 +7,7 @@ from .main import start
 from django.conf import settings
 from .functions import empty_media_folder
 from .models import Image
+import os
 
 # Create your views here.
 def index(request):
@@ -48,7 +49,16 @@ def processing(request):
 def track_progress(request, id):
     print("Hi Rockzzz")
     print(threading.active_count(), id)
-    f = open(settings.MEDIA_ROOT+"/images/"+str(id)+"/progress.txt","r")
+    try:
+        f = open(settings.MEDIA_ROOT+"/images/"+str(id)+"/progress.txt","r")
+    except:
+        p = settings.MEDIA_ROOT+"/images/"+str(id)
+        if not os.path.exists(p):
+            os.makedirs(p)
+        f = open(settings.MEDIA_ROOT+"/images/"+str(id)+"/progress.txt","w")
+        f.write("0.00")
+        f.close()
+        f = open(settings.MEDIA_ROOT+"/images/"+str(id)+"/progress.txt","r")
     progress = float(f.readline())
     f.close()
     return JsonResponse({'progress' :round(progress,2)} , status= 200)
